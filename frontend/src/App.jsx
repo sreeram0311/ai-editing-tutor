@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import Header from './components/Header';
-import AgentActivityDrawer from './components/AgentActivityDrawer';
-import TutorView from './views/TutorView';
-import MediaAnalyzerView from './views/MediaAnalyzerView';
-import PracticeView from './views/PracticeView';
-import ProfileView from './views/ProfileView';
-import TimelineView from './views/TimelineView';
+import ToolRail from './components/ToolRail';
+import TopBar from './components/TopBar';
+import EditorialInspector from './components/EditorialInspector';
+import ProcessDiagnosticsDrawer from './components/ProcessDiagnosticsDrawer';
+
+import EditorialTutorWorkspace from './views/EditorialTutorWorkspace';
+import MediaAnalysisWorkstation from './views/MediaAnalysisWorkstation';
+import PracticeDrillsWorkstation from './views/PracticeDrillsWorkstation';
+import EditorialProfileWorkstation from './views/EditorialProfileWorkstation';
+import MasterTimelineWorkstation from './views/MasterTimelineWorkstation';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('tutor'); // 'tutor' is default primary view!
+  const [activeView, setActiveView] = useState('tutor'); // Default view: NLE Editorial Tutor
   const [userSkill, setUserSkill] = useState('Beginner');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -52,7 +55,7 @@ export default function App() {
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { sender: 'tutor', text: `⚠️ Error processing request: ${err.message}` },
+        { sender: 'tutor', text: `ERROR PROCESSING REQUEST: ${err.message}` },
       ]);
     } finally {
       setLoading(false);
@@ -67,71 +70,82 @@ export default function App() {
         setCurrentExercise(ex);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch exercise:', err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12">
-      {/* 1. TOP HEADER */}
-      <Header
-        activeView={activeView}
-        setActiveView={setActiveView}
+    <div className="h-screen w-screen bg-studio-950 text-studio-100 flex flex-col overflow-hidden select-none font-sans">
+      
+      {/* 1. TOP STUDIO HEADER */}
+      <TopBar
         userSkill={userSkill}
         setUserSkill={setUserSkill}
-        toggleActivityDrawer={() => setIsDrawerOpen(!isDrawerOpen)}
-        isDrawerOpen={isDrawerOpen}
+        toggleDiagnostics={() => setIsDiagnosticsOpen(!isDiagnosticsOpen)}
+        isDiagnosticsOpen={isDiagnosticsOpen}
       />
 
-      {/* 2. MAIN WORKSPACE CONTAINER */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
+      {/* 2. MAIN WORKSTATION WORKSPACE AREA */}
+      <div className="flex-1 flex overflow-hidden relative">
         
-        {/* VIEW A: TUTOR PAGE (PRIMARY EXPERIENCE) */}
-        {activeView === 'tutor' && (
-          <TutorView
-            messages={messages}
-            loading={loading}
-            onSendMessage={handleSendMessage}
-            currentMedia={currentMedia}
-            onMediaAnalyzed={(media) => setCurrentMedia(media)}
-            detectedIntent={detectedIntent}
-            selectedComponents={selectedComponents}
-            userSkill={userSkill}
-          />
-        )}
+        {/* NLE Left Narrow Tool Rail */}
+        <ToolRail activeTool={activeView} setActiveTool={setActiveView} />
 
-        {/* VIEW B: MEDIA ANALYZER PAGE */}
-        {activeView === 'media' && (
-          <MediaAnalyzerView
-            currentMedia={currentMedia}
-            onMediaAnalyzed={(media) => setCurrentMedia(media)}
-          />
-        )}
+        {/* Central Dynamic Active Workstation */}
+        <main className="flex-1 overflow-hidden relative border-r border-studio-800 bg-studio-950">
+          {activeView === 'tutor' && (
+            <EditorialTutorWorkspace
+              messages={messages}
+              loading={loading}
+              onSendMessage={handleSendMessage}
+              currentMedia={currentMedia}
+              onMediaAnalyzed={(media) => setCurrentMedia(media)}
+              detectedIntent={detectedIntent}
+              selectedComponents={selectedComponents}
+              userSkill={userSkill}
+            />
+          )}
 
-        {/* VIEW C: PRACTICE DRILLS PAGE */}
-        {activeView === 'practice' && (
-          <PracticeView
-            exercise={currentExercise}
-            onRequestNewExercise={fetchExercise}
-          />
-        )}
+          {activeView === 'media' && (
+            <MediaAnalysisWorkstation
+              currentMedia={currentMedia}
+              onMediaAnalyzed={(media) => setCurrentMedia(media)}
+            />
+          )}
 
-        {/* VIEW D: LEARNING PROFILE PAGE */}
-        {activeView === 'profile' && (
-          <ProfileView userId="default_student" />
-        )}
+          {activeView === 'practice' && (
+            <PracticeDrillsWorkstation
+              exercise={currentExercise}
+              onRequestNewExercise={fetchExercise}
+            />
+          )}
 
-        {/* VIEW E: NLE TIMELINE TOOL PAGE */}
-        {activeView === 'timeline' && (
-          <TimelineView currentMedia={currentMedia} />
-        )}
+          {activeView === 'profile' && (
+            <EditorialProfileWorkstation
+              userId="default_student"
+              skillLevel={userSkill}
+              setSkillLevel={setUserSkill}
+            />
+          )}
 
-      </main>
+          {activeView === 'timeline' && (
+            <MasterTimelineWorkstation currentMedia={currentMedia} />
+          )}
+        </main>
 
-      {/* 3. AGENT ACTIVITY SLIDE-OVER DRAWER */}
-      <AgentActivityDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
+        {/* Right NLE Inspector Panel */}
+        <EditorialInspector
+          detectedIntent={detectedIntent}
+          selectedComponents={selectedComponents}
+          userSkill={userSkill}
+          currentMedia={currentMedia}
+        />
+      </div>
+
+      {/* 3. DIAGNOSTICS & REACT PROCESS DRAWER */}
+      <ProcessDiagnosticsDrawer
+        isOpen={isDiagnosticsOpen}
+        onClose={() => setIsDiagnosticsOpen(false)}
         trace={reactTrace}
         selectedComponents={selectedComponents}
         detectedIntent={detectedIntent}
