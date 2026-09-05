@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, Monitor, Sliders, CheckCircle2, BookOpen, Layers } from 'lucide-react';
+import { Monitor } from 'lucide-react';
 
 export default function EditorialFormattedResponse({ rawText, userSkill }) {
   if (!rawText) return null;
@@ -68,7 +68,7 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
     return parts.map((part, idx) => {
       if (shortcutRegex.test(part)) {
         return (
-          <kbd key={idx} className="px-2 py-0.5 rounded bg-cinema-950 border border-amber-500/40 text-amber-300 font-mono text-xs font-semibold mx-1 shadow-sm">
+          <kbd key={idx} className="px-2.5 py-1 rounded-md bg-[#25283c] border border-amber-500/40 text-amber-300 font-mono text-xs font-bold mx-1 shadow-sm inline-block">
             {part}
           </kbd>
         );
@@ -89,7 +89,7 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
             const body = paragraph.substring(colonIndex + 2).trim();
 
             return (
-              <div key={idx} className="bg-cinema-950/80 p-5 rounded-xl border border-cinema-700/80 space-y-1.5 shadow-md">
+              <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] space-y-1.5 shadow-md">
                 <span className="text-xs md:text-sm font-bold text-amber-400 uppercase tracking-wider block font-sans">
                   {title}
                 </span>
@@ -109,21 +109,21 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
       {/* 2. NLE EXECUTION CARDS */}
       {softwareList.length > 0 && (
         <div className="space-y-4 pt-2">
-          <div className="flex items-center gap-2 border-t border-cinema-800 pt-5">
+          <div className="flex items-center gap-2.5 border-t border-[#252838] pt-5">
             <Monitor className="w-5 h-5 text-amber-400" />
-            <span className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wider font-sans">
+            <span className="text-sm font-bold text-slate-200 uppercase tracking-wider font-sans">
               NLE SOFTWARE EXECUTION STEPS
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {softwareList.map((sw, idx) => (
-              <div key={idx} className="bg-cinema-950 p-4 rounded-xl border border-cinema-700/80 space-y-2 shadow-md">
+              <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] hover:border-amber-500/40 space-y-2.5 shadow-md transition-all">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-white font-sans">
+                  <span className="text-base font-bold text-white font-sans">
                     {sw.name}
                   </span>
-                  <span className="text-xs font-mono text-slate-400 font-semibold">Step #{idx + 1}</span>
+                  <span className="text-xs font-mono text-amber-400 font-semibold">Step #{idx + 1}</span>
                 </div>
                 <p className="text-sm text-slate-200 leading-relaxed font-sans">
                   {renderFormattedInstruction(sw.instruction)}
@@ -136,8 +136,8 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
 
       {/* 3. RECOMMENDED STYLES & ATMOSPHERE */}
       {stylesText && (
-        <div className="bg-cinema-950 p-5 rounded-xl border border-cinema-700/80 space-y-2 pt-3 shadow-md">
-          <span className="text-xs md:text-sm font-bold text-amber-400 uppercase tracking-wider block font-sans">
+        <div className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] space-y-2 pt-4 shadow-md">
+          <span className="text-sm font-bold text-amber-400 uppercase tracking-wider block font-sans">
             RECOMMENDED EDITING STYLES
           </span>
           <p className="text-sm text-slate-200 leading-relaxed font-sans">

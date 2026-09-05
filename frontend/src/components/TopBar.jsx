@@ -3,7 +3,7 @@ import { Sparkles, Cpu, ChevronDown } from 'lucide-react';
 
 export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isDiagnosticsOpen }) {
   return (
-    <header className="h-14 bg-cinema-950 border-b border-cinema-800 px-6 flex items-center justify-between text-base select-none shrink-0 z-30 font-sans">
+    <header className="h-14 bg-[#0c0d12] border-b border-[#252838] px-6 flex items-center justify-between text-base select-none shrink-0 z-30 font-sans">
       
       {/* Left Application Identifier */}
       <div className="flex items-center gap-3">
@@ -29,11 +29,11 @@ export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isD
             <select
               value={userSkill}
               onChange={(e) => setUserSkill(e.target.value)}
-              className="bg-cinema-900 text-amber-400 text-sm font-semibold rounded-lg pl-3 pr-8 py-1.5 border border-cinema-700 focus:outline-none focus:border-amber-500 cursor-pointer appearance-none"
+              className="bg-[#141622] text-amber-400 text-sm font-semibold rounded-lg pl-3.5 pr-8 py-1.5 border border-[#252838] focus:outline-none focus:border-amber-500 cursor-pointer appearance-none"
             >
-              <option value="Beginner" className="bg-cinema-900 text-white">Beginner</option>
-              <option value="Intermediate" className="bg-cinema-900 text-white">Intermediate</option>
-              <option value="Advanced" className="bg-cinema-900 text-white">Advanced</option>
+              <option value="Beginner" className="bg-[#141622] text-white">Beginner</option>
+              <option value="Intermediate" className="bg-[#141622] text-white">Intermediate</option>
+              <option value="Advanced" className="bg-[#141622] text-white">Advanced</option>
             </select>
             <ChevronDown className="w-4 h-4 text-amber-400 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
@@ -45,7 +45,7 @@ export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isD
           className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all border cursor-pointer ${
             isDiagnosticsOpen
               ? 'bg-amber-500/10 text-amber-400 border-amber-500/40'
-              : 'bg-cinema-900 text-slate-200 hover:text-white border-cinema-700 hover:border-cinema-600'
+              : 'bg-[#141622] text-slate-200 hover:text-white border-[#252838] hover:border-[#35394e]'
           }`}
           title="Inspect Assistant Process"
         >

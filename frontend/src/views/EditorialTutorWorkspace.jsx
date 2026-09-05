@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Paperclip, ArrowUpRight, CornerDownLeft, RefreshCw, SlidersHorizontal, Film, HelpCircle } from 'lucide-react';
+import { Sparkles, Paperclip, ArrowUpRight, CornerDownLeft, RefreshCw } from 'lucide-react';
 import EditorialFormattedResponse from '../components/EditorialFormattedResponse';
 
 export default function EditorialTutorWorkspace({ 
@@ -41,16 +41,16 @@ export default function EditorialTutorWorkspace({
   };
 
   return (
-    <div className="h-full flex flex-col bg-cinema-950 overflow-hidden font-sans">
+    <div className="h-full flex flex-col bg-[#0c0d12] overflow-hidden font-sans">
       
       {/* 1. TUTOR WELCOME / HOME STATE (When no messages sent yet) */}
       {messages.length === 0 ? (
-        <div className="flex-1 overflow-y-auto flex items-center justify-center p-6 md:p-8">
+        <div className="flex-1 overflow-y-auto flex items-center justify-center p-6 md:p-8 animate-fade-in">
           <div className="w-full max-w-3xl space-y-8 py-6">
             
             {/* Centered Welcome Header */}
             <div className="space-y-4 text-center">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold">
                 <Sparkles className="w-4 h-4" />
                 <span>EDITORIAL ASSISTANT</span>
               </div>
@@ -59,18 +59,18 @@ export default function EditorialTutorWorkspace({
                 How can I help with your edit?
               </h1>
 
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-sm text-slate-300">
+              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2 text-sm text-slate-300">
                 <span className="text-slate-400 font-medium">Ask about:</span>
                 {categories.map((cat, i) => (
-                  <span key={i} className="px-3 py-1 rounded-lg bg-cinema-900 border border-cinema-700/80 text-slate-200 font-medium">
+                  <span key={i} className="px-3.5 py-1 rounded-xl bg-[#141622] border border-[#252838] text-slate-200 font-medium shadow-sm">
                     {cat}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Prompt Input Form */}
-            <form onSubmit={handleSubmit} className="relative bg-cinema-900 border border-cinema-700/80 focus-within:border-amber-500 rounded-2xl p-4 shadow-2xl transition-all space-y-4">
+            {/* Main Prompt Input Box */}
+            <form onSubmit={handleSubmit} className="relative bg-[#141622] border border-[#252838] focus-within:border-amber-500 rounded-2xl p-4 shadow-2xl transition-all space-y-4">
               <textarea
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
@@ -83,11 +83,11 @@ export default function EditorialTutorWorkspace({
                 placeholder="What are you trying to achieve with this edit?"
                 disabled={loading}
                 rows={3}
-                className="w-full bg-transparent text-white placeholder-slate-400 text-base md:text-lg focus:outline-none resize-none font-sans leading-relaxed px-2 pt-1 font-normal"
+                className="w-full bg-[#141622] text-white placeholder-slate-400 text-base md:text-lg focus:outline-none resize-none font-sans leading-relaxed px-2 pt-1 font-normal border-none"
               />
 
-              <div className="flex items-center justify-between pt-3 border-t border-cinema-800">
-                <label className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cinema-950 hover:bg-cinema-850 text-slate-300 hover:text-white border border-cinema-700 text-xs md:text-sm font-medium cursor-pointer transition-colors" title="Attach Media Footage">
+              <div className="flex items-center justify-between pt-3 border-t border-[#252838]">
+                <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0c0d12] hover:bg-[#181a28] text-slate-200 hover:text-white border border-[#252838] text-sm font-medium cursor-pointer transition-all" title="Attach Media Footage">
                   <Paperclip className="w-4 h-4 text-amber-400" />
                   <span>Attach Footage</span>
                   <input
@@ -109,7 +109,7 @@ export default function EditorialTutorWorkspace({
                 <button
                   type="submit"
                   disabled={loading || !inputQuery.trim()}
-                  className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-cinema-950 font-bold text-sm rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer"
+                  className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-cinema-950 font-bold text-sm rounded-xl transition-all flex items-center gap-2 shadow-lg cursor-pointer"
                 >
                   <span>Consult Assistant</span>
                   <CornerDownLeft className="w-4 h-4" />
@@ -127,7 +127,7 @@ export default function EditorialTutorWorkspace({
                   <button
                     key={idx}
                     onClick={() => handleQuickClick(prompt)}
-                    className="text-left p-4 rounded-xl bg-cinema-900/80 hover:bg-cinema-900 border border-cinema-700/80 hover:border-amber-500/50 text-slate-200 hover:text-white text-sm transition-all flex items-center justify-between group font-medium"
+                    className="text-left p-4 rounded-xl bg-[#141622] hover:bg-[#181a28] border border-[#252838] hover:border-amber-500/50 text-slate-200 hover:text-white text-sm transition-all flex items-center justify-between group font-medium shadow-sm"
                   >
                     <span>{prompt}</span>
                     <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-amber-400 transition-colors shrink-0 ml-2" />
@@ -140,12 +140,12 @@ export default function EditorialTutorWorkspace({
         </div>
       ) : (
         /* 2. EDITORIAL CONSULTATION RESPONSE STATE */
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 max-w-4xl mx-auto w-full">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 max-w-4xl mx-auto w-full animate-fade-in">
           {messages.map((msg, idx) => (
-            <div key={idx} className="space-y-3">
+            <div key={idx} className="space-y-4 animate-fade-in">
               {msg.sender === 'user' ? (
                 /* Editor Query Header */
-                <div className="bg-cinema-900 border border-cinema-700/80 p-5 rounded-2xl space-y-1.5 shadow-md">
+                <div className="bg-[#141622] border border-[#252838] p-6 rounded-2xl space-y-1.5 shadow-md">
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block font-sans">
                     EDITOR QUESTION
                   </span>
@@ -155,8 +155,8 @@ export default function EditorialTutorWorkspace({
                 </div>
               ) : (
                 /* Professional Editorial Guidance Response */
-                <div className="bg-cinema-900/90 border border-cinema-700/80 p-6 md:p-8 rounded-2xl space-y-6 text-slate-100 leading-relaxed font-sans shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-cinema-800 pb-4">
+                <div className="bg-[#141622] border border-[#252838] p-6 md:p-8 rounded-2xl space-y-6 text-slate-100 leading-relaxed font-sans shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-[#252838] pb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
                       <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
@@ -176,7 +176,7 @@ export default function EditorialTutorWorkspace({
           ))}
 
           {loading && (
-            <div className="p-6 bg-cinema-900 border border-cinema-700 rounded-2xl flex items-center justify-center gap-3 text-sm text-amber-400 font-sans font-semibold shadow-lg">
+            <div className="p-6 bg-[#141622] border border-[#252838] rounded-2xl flex items-center justify-center gap-3 text-sm text-amber-400 font-sans font-semibold shadow-lg animate-fade-in">
               <RefreshCw className="w-5 h-5 animate-spin text-amber-500" />
               <span>Analyzing edit structure & synthesizing editorial guidance...</span>
             </div>
@@ -186,11 +186,11 @@ export default function EditorialTutorWorkspace({
         </div>
       )}
 
-      {/* 3. INPUT FOOTER (When consultation in progress) */}
+      {/* 3. INPUT FOOTER (When consultation is active) */}
       {messages.length > 0 && (
-        <div className="p-4 md:p-5 bg-cinema-950 border-t border-cinema-800">
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-3">
-            <label className="p-3 rounded-xl bg-cinema-900 border border-cinema-700 text-slate-300 hover:text-white cursor-pointer transition-colors" title="Attach Footage">
+        <div className="p-4 md:p-5 bg-[#0c0d12] border-t border-[#252838]">
+          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex items-center gap-3">
+            <label className="p-3.5 rounded-xl bg-[#141622] border border-[#252838] hover:border-amber-500/50 text-slate-200 hover:text-white cursor-pointer transition-all shadow-sm" title="Attach Footage">
               <Paperclip className="w-5 h-5 text-amber-400" />
               <input
                 type="file"
@@ -214,13 +214,13 @@ export default function EditorialTutorWorkspace({
               onChange={(e) => setInputQuery(e.target.value)}
               placeholder="Ask a follow-up question about your edit..."
               disabled={loading}
-              className="flex-1 bg-cinema-900 border border-cinema-700 focus:border-amber-500 rounded-xl px-4 py-3 text-sm md:text-base text-white placeholder-slate-400 focus:outline-none font-sans font-medium"
+              className="flex-1 bg-[#141622] border border-[#252838] focus:border-amber-500 rounded-xl px-5 py-3.5 text-base text-white placeholder-slate-400 focus:outline-none font-sans font-normal shadow-sm"
             />
 
             <button
               type="submit"
               disabled={loading || !inputQuery.trim()}
-              className="px-5 py-3 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-cinema-950 font-bold text-sm rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer"
+              className="px-6 py-3.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-cinema-950 font-bold text-sm rounded-xl transition-all flex items-center gap-2 shadow-lg cursor-pointer"
             >
               <span>Submit</span>
               <CornerDownLeft className="w-4 h-4" />
