@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import ChatView from './components/ChatView';
-import ReActTracePanel from './components/ReActTracePanel';
-import MediaUploader from './components/MediaUploader';
-import ProfileDashboard from './components/ProfileDashboard';
-import ExerciseView from './components/ExerciseView';
-import TimelineViewer from './components/TimelineViewer';
+import Header from './components/Header';
+import AgentActivityDrawer from './components/AgentActivityDrawer';
+import TutorView from './views/TutorView';
+import MediaAnalyzerView from './views/MediaAnalyzerView';
+import PracticeView from './views/PracticeView';
+import ProfileView from './views/ProfileView';
+import TimelineView from './views/TimelineView';
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('chat'); // 'chat' is MAIN by default!
+  const [activeView, setActiveView] = useState('tutor'); // 'tutor' is default primary view!
   const [userSkill, setUserSkill] = useState('Beginner');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentMedia, setCurrentMedia] = useState(null);
@@ -70,89 +72,70 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f4] text-[#1c1917] font-sans pb-12">
-      {/* Navigation Menu Bar Header */}
-      <Navbar
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12">
+      {/* 1. TOP HEADER */}
+      <Header
+        activeView={activeView}
+        setActiveView={setActiveView}
         userSkill={userSkill}
         setUserSkill={setUserSkill}
+        toggleActivityDrawer={() => setIsDrawerOpen(!isDrawerOpen)}
+        isDrawerOpen={isDrawerOpen}
       />
 
-      {/* Main Content Workspace Container */}
-      <main className="max-w-7xl mx-auto px-4 md:px-6 pt-6">
+      {/* 2. MAIN WORKSPACE CONTAINER */}
+      <main className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
         
-        {/* SECTION 1: CHATBOT IS MAIN (DEFAULT VIEW) */}
-        {activeSection === 'chat' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8">
-              <ChatView
-                onSendMessage={handleSendMessage}
-                messages={messages}
-                loading={loading}
-                currentMedia={currentMedia}
-              />
-            </div>
-            <div className="lg:col-span-4 space-y-6">
-              <ReActTracePanel
-                trace={reactTrace}
-                selectedComponents={selectedComponents}
-                detectedIntent={detectedIntent}
-              />
-              <MediaUploader
-                onMediaAnalyzed={(media) => setCurrentMedia(media)}
-                currentMedia={currentMedia}
-              />
-            </div>
-          </div>
+        {/* VIEW A: TUTOR PAGE (PRIMARY EXPERIENCE) */}
+        {activeView === 'tutor' && (
+          <TutorView
+            messages={messages}
+            loading={loading}
+            onSendMessage={handleSendMessage}
+            currentMedia={currentMedia}
+            onMediaAnalyzed={(media) => setCurrentMedia(media)}
+            detectedIntent={detectedIntent}
+            selectedComponents={selectedComponents}
+            userSkill={userSkill}
+          />
         )}
 
-        {/* SECTION 2: REACT ACTIVITY TRACE */}
-        {activeSection === 'trace' && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <ReActTracePanel
-              trace={reactTrace}
-              selectedComponents={selectedComponents}
-              detectedIntent={detectedIntent}
-            />
-          </div>
+        {/* VIEW B: MEDIA ANALYZER PAGE */}
+        {activeView === 'media' && (
+          <MediaAnalyzerView
+            currentMedia={currentMedia}
+            onMediaAnalyzed={(media) => setCurrentMedia(media)}
+          />
         )}
 
-        {/* SECTION 3: MEDIA ANALYZER TOOL */}
-        {activeSection === 'media' && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <MediaUploader
-              onMediaAnalyzed={(media) => setCurrentMedia(media)}
-              currentMedia={currentMedia}
-            />
-          </div>
+        {/* VIEW C: PRACTICE DRILLS PAGE */}
+        {activeView === 'practice' && (
+          <PracticeView
+            exercise={currentExercise}
+            onRequestNewExercise={fetchExercise}
+          />
         )}
 
-        {/* SECTION 4: LEARNING PROFILE */}
-        {activeSection === 'profile' && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <ProfileDashboard userId="default_student" />
-          </div>
+        {/* VIEW D: LEARNING PROFILE PAGE */}
+        {activeView === 'profile' && (
+          <ProfileView userId="default_student" />
         )}
 
-        {/* SECTION 5: PRACTICE DRILLS */}
-        {activeSection === 'exercise' && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <ExerciseView
-              exercise={currentExercise}
-              onRequestNewExercise={fetchExercise}
-            />
-          </div>
-        )}
-
-        {/* SECTION 6: NLE TIMELINE */}
-        {activeSection === 'timeline' && (
-          <div className="max-w-5xl mx-auto space-y-6">
-            <TimelineViewer mediaInfo={currentMedia} />
-          </div>
+        {/* VIEW E: NLE TIMELINE TOOL PAGE */}
+        {activeView === 'timeline' && (
+          <TimelineView currentMedia={currentMedia} />
         )}
 
       </main>
+
+      {/* 3. AGENT ACTIVITY SLIDE-OVER DRAWER */}
+      <AgentActivityDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        trace={reactTrace}
+        selectedComponents={selectedComponents}
+        detectedIntent={detectedIntent}
+      />
     </div>
   );
 }
