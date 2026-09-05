@@ -1,55 +1,54 @@
 import React from 'react';
-import { Sliders, Activity, Settings } from 'lucide-react';
+import { Sparkles, Cpu, ChevronDown } from 'lucide-react';
 
 export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isDiagnosticsOpen }) {
   return (
-    <header className="h-10 bg-studio-900 border-b border-studio-800 px-4 flex items-center justify-between text-xs select-none shrink-0 z-30 font-sans">
+    <header className="h-12 bg-cinema-950 border-b border-cinema-800/60 px-6 flex items-center justify-between text-sm select-none shrink-0 z-30 font-sans">
+      
       {/* Left Application Identifier */}
       <div className="flex items-center gap-3">
-        <span className="font-extrabold text-studio-100 tracking-wider text-xs font-mono uppercase">
-          AI EDITING TUTOR
-        </span>
-        <span className="text-[10px] font-mono text-studio-500 border-l border-studio-800 pl-3">
-          Post-Production Editorial Workstation v2.0
-        </span>
+        <div className="w-6 h-6 rounded bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
+          <Sparkles className="w-3.5 h-3.5" />
+        </div>
+        <div>
+          <span className="font-semibold text-cinema-100 tracking-tight text-sm font-sans">
+            AI EDITING TUTOR
+          </span>
+          <span className="hidden sm:inline text-xs text-cinema-500 ml-2 font-normal">
+            Editorial Intelligence for Video Editors
+          </span>
+        </div>
       </div>
 
-      {/* Center Current Sequence / Project Context */}
-      <div className="hidden md:flex items-center gap-2 font-mono text-[11px] text-studio-400">
-        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span>Sequence 01 — Master Edit</span>
-        <span className="text-studio-600">|</span>
-        <span className="text-studio-500">ProRes 422 HQ • 24.00 fps</span>
-      </div>
-
-      {/* Right Restrained Controls */}
-      <div className="flex items-center gap-3">
-        {/* Compact Skill Level Dropdown */}
-        <div className="flex items-center gap-1.5 font-mono text-[11px]">
-          <span className="text-studio-500">LEVEL:</span>
+      {/* Right Controls */}
+      <div className="flex items-center gap-4">
+        {/* Skill Selector */}
+        <div className="relative flex items-center gap-1.5 text-xs text-cinema-400">
+          <span className="text-cinema-500 font-medium">Skill:</span>
           <select
             value={userSkill}
             onChange={(e) => setUserSkill(e.target.value)}
-            className="bg-studio-800 text-gold text-[11px] font-mono font-bold rounded px-2 py-0.5 border border-studio-700 focus:outline-none cursor-pointer"
+            className="bg-cinema-900 text-cinema-100 text-xs font-medium rounded-lg px-2.5 py-1 border border-cinema-800 focus:outline-none focus:border-amber-500/50 cursor-pointer appearance-none pr-6"
           >
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>
             <option value="Advanced">Advanced</option>
           </select>
+          <ChevronDown className="w-3 h-3 text-cinema-400 absolute right-2 pointer-events-none" />
         </div>
 
-        {/* Process Diagnostics Trigger */}
+        {/* Assistant Process Drawer Button */}
         <button
           onClick={toggleDiagnostics}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-mono font-bold transition-all border ${
+          className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-all border ${
             isDiagnosticsOpen
-              ? 'bg-studio-800 text-gold border-gold/40'
-              : 'bg-studio-850 text-studio-400 hover:text-studio-100 border-studio-700'
+              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+              : 'bg-cinema-900 text-cinema-400 hover:text-cinema-100 border-cinema-800 hover:border-cinema-700'
           }`}
-          title="Open Process Diagnostics Drawer"
+          title="Inspect Assistant Process"
         >
-          <Activity className="w-3.5 h-3.5" />
-          <span>DIAGNOSTICS</span>
+          <Cpu className="w-3.5 h-3.5 text-amber-500" />
+          <span>Assistant Process</span>
         </button>
       </div>
     </header>

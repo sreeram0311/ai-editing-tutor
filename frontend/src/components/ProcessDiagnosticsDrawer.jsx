@@ -1,76 +1,107 @@
 import React from 'react';
-import { X, CheckCircle2, Activity, ArrowRight } from 'lucide-react';
+import { X, Cpu, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function ProcessDiagnosticsDrawer({ isOpen, onClose, trace, selectedComponents, detectedIntent }) {
   if (!isOpen) return null;
 
+  const stages = [
+    { name: 'Understanding', desc: 'Intent classification & user query analysis' },
+    { name: 'Knowledge Retrieval', desc: 'Assembling NLE technique models & rules' },
+    { name: 'Media Analysis', desc: 'Shot cut boundary & frame parameter inspection' },
+    { name: 'Editorial Synthesis', desc: 'Calibrating recommendations to skill tier' },
+  ];
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-xs transition-opacity flex justify-end">
-      <div className="w-full max-w-md bg-studio-900 h-full border-l border-studio-800 flex flex-col shadow-2xl">
+      <div className="w-full max-w-md bg-cinema-950 h-full border-l border-cinema-800/80 flex flex-col shadow-2xl font-sans">
         
         {/* Header */}
-        <div className="h-11 bg-studio-850 px-4 border-b border-studio-800 flex items-center justify-between font-mono text-xs font-bold text-studio-100 uppercase tracking-wider">
-          <span className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-gold" />
-            PROCESS DIAGNOSTICS & REACT TRACE
-          </span>
-          <button onClick={onClose} className="p-1 text-studio-500 hover:text-white">
-            <X className="w-4 h-4" />
+        <div className="h-12 bg-cinema-900 px-6 border-b border-cinema-800 flex items-center justify-between text-sm font-semibold text-cinema-100">
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-amber-500" />
+            <span>Assistant Process</span>
+          </div>
+          <button onClick={onClose} className="p-1 text-cinema-500 hover:text-cinema-100 transition-colors">
+            <X className="w-4.5 h-4.5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 font-mono text-xs">
-          {/* Intent Card */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-cinema-300">
+          
+          {/* Query Intent */}
           {detectedIntent && (
-            <div className="bg-studio-950 p-3 rounded border border-studio-800 space-y-2">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-studio-500 font-bold uppercase">QUESTION INTENT</span>
-                <span className="text-gold font-bold">{detectedIntent}</span>
-              </div>
-
-              {selectedComponents && selectedComponents.length > 0 && (
-                <div className="pt-2 border-t border-studio-800 space-y-1">
-                  <span className="text-[10px] text-studio-500 font-bold uppercase block">ASSEMBLED PIPELINE:</span>
-                  <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                    {selectedComponents.map((c, i) => (
-                      <React.Fragment key={i}>
-                        <span className="px-2 py-0.5 rounded bg-studio-900 text-studio-200 border border-studio-800">
-                          {c}
-                        </span>
-                        {i < selectedComponents.length - 1 && <ArrowRight className="w-3 h-3 text-studio-600" />}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div className="bg-cinema-900 p-4 rounded-xl border border-cinema-800 space-y-2">
+              <span className="text-[11px] font-medium text-cinema-500 uppercase tracking-wider block">
+                Classified Subject Intent
+              </span>
+              <span className="text-sm font-semibold text-amber-400 block">
+                {detectedIntent}
+              </span>
             </div>
           )}
 
-          {/* Stepper Timeline */}
-          <div className="space-y-2 pt-1">
-            <span className="text-[11px] font-bold text-studio-400 uppercase tracking-wider block">
-              EXECUTION TIMELINE STEPS:
+          {/* Assistant Workflow Stages */}
+          <div className="space-y-3">
+            <span className="text-xs font-semibold text-cinema-400 uppercase tracking-wider block">
+              Execution Process Workflow
             </span>
 
-            {!trace || trace.length === 0 ? (
-              <div className="p-6 text-center bg-studio-950 rounded border border-studio-800 text-studio-500 text-xs">
-                No diagnostic execution recorded yet. Submit a query to inspect agent steps.
+            <div className="space-y-3">
+              {stages.map((stage, idx) => (
+                <div key={idx} className="bg-cinema-900 p-3.5 rounded-xl border border-cinema-800/80 flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/30 flex items-center justify-center font-mono text-[11px] font-semibold shrink-0 mt-0.5">
+                    {idx + 1}
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-semibold text-cinema-100 block">
+                      {stage.name}
+                    </span>
+                    <span className="text-[11px] text-cinema-400 block leading-relaxed">
+                      {stage.desc}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Assembled Components */}
+          {selectedComponents && selectedComponents.length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-cinema-800/60">
+              <span className="text-xs font-semibold text-cinema-400 uppercase tracking-wider block">
+                Assembled Component Pipeline
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {selectedComponents.map((comp, idx) => (
+                  <span key={idx} className="px-2.5 py-1 rounded-md bg-cinema-900 text-cinema-200 border border-cinema-800 text-xs font-medium">
+                    {comp}
+                  </span>
+                ))}
               </div>
-            ) : (
+            </div>
+          )}
+
+          {/* Trace Steps (If detailed inspection requested) */}
+          {trace && trace.length > 0 && (
+            <div className="space-y-2 pt-4 border-t border-cinema-800/60 font-mono text-xs">
+              <span className="text-xs font-semibold font-sans text-cinema-400 uppercase tracking-wider block">
+                ReAct Step Log
+              </span>
               <div className="space-y-2">
                 {trace.map((item, idx) => (
-                  <div key={idx} className="bg-slate-950 p-3 rounded border border-slate-800 space-y-1 text-[11px]">
-                    <div className="flex justify-between font-bold text-slate-200">
+                  <div key={idx} className="bg-cinema-900/80 p-3 rounded-lg border border-cinema-800 space-y-1">
+                    <div className="flex justify-between font-semibold text-cinema-200">
                       <span>{item.label}</span>
-                      <span className="text-[10px] text-slate-500">{item.step}</span>
+                      <span className="text-cinema-500">{item.step}</span>
                     </div>
-                    <p className="text-slate-400 leading-relaxed text-[10px]">{item.detail}</p>
+                    <p className="text-cinema-400 text-[11px] leading-relaxed font-sans">{item.detail}</p>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

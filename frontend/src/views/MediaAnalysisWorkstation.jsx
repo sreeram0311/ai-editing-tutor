@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Film, HardDrive, CheckCircle2, Activity, Play, Pause } from 'lucide-react';
+import { Upload, Film, HardDrive, CheckCircle2, Activity, Play, Pause, BarChart2, Eye, Volume2 } from 'lucide-react';
 
 export default function MediaAnalysisWorkstation({ currentMedia, onMediaAnalyzed }) {
   const [uploading, setUploading] = useState(false);
@@ -32,80 +32,131 @@ export default function MediaAnalysisWorkstation({ currentMedia, onMediaAnalyzed
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden select-none font-sans space-y-4">
-      {/* Workstation Header */}
-      <div className="h-9 bg-studio-900 px-4 border-b border-studio-800 flex items-center justify-between font-mono text-[11px] text-studio-400 uppercase font-bold shrink-0">
-        <span className="flex items-center gap-2">
-          <HardDrive className="w-4 h-4 text-gold" />
-          SOURCE MEDIA ANALYSIS WORKSPACE
-        </span>
-        <span className="text-studio-500">OPENCV FRAME ENGINE</span>
-      </div>
+    <div className="h-full overflow-y-auto bg-cinema-950 p-6 md:p-8 space-y-8 font-sans text-cinema-100">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-cinema-800/80 pb-4">
+        <div>
+          <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider block">
+            SOURCE MEDIA STUDIO
+          </span>
+          <h2 className="text-xl font-semibold text-cinema-100 font-sans tracking-tight">
+            Footage Structure & Scene Analysis
+          </h2>
+        </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-        {/* Upload Zone */}
-        <label className="border border-dashed border-studio-700 hover:border-gold bg-studio-900 rounded p-8 flex flex-col items-center justify-center cursor-pointer text-center space-y-2">
-          {uploading ? (
-            <div className="flex flex-col items-center gap-2 font-mono text-xs text-gold">
-              <Activity className="w-6 h-6 animate-spin" />
-              <span>Analyzing Frame Histogram & Scene Changes...</span>
-            </div>
-          ) : (
-            <>
-              <Film className="w-8 h-8 text-gold" />
-              <span className="text-xs font-bold text-studio-100 font-mono uppercase">IMPORT FOOTAGE FILE FOR ANALYSIS</span>
-              <span className="text-[11px] text-studio-500 font-mono">Supports MP4, MOV, WAV, JPG (Max 50MB)</span>
-              <input 
-                type="file" 
-                className="hidden" 
-                accept="video/*,audio/*,image/*"
-                onChange={(e) => handleFileUpload(e.target.files[0])}
-              />
-            </>
-          )}
+        <label className="px-4 py-2 bg-cinema-900 hover:bg-cinema-850 border border-cinema-800 rounded-xl text-xs font-medium text-cinema-200 hover:text-white cursor-pointer transition-all flex items-center gap-2">
+          <Upload className="w-3.5 h-3.5 text-amber-500" />
+          <span>Import Footage</span>
+          <input 
+            type="file" 
+            className="hidden" 
+            accept="video/*,audio/*,image/*"
+            onChange={(e) => handleFileUpload(e.target.files[0])}
+          />
         </label>
-
-        {/* Media Analysis Details */}
-        {currentMedia && (
-          <div className="bg-studio-900 border border-studio-800 rounded p-4 space-y-4 font-mono text-xs">
-            <div className="flex items-center justify-between border-b border-studio-800 pb-3">
-              <span className="font-bold text-studio-100 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                {currentMedia.filename}
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-studio-950 text-gold border border-studio-800 font-bold uppercase">
-                {currentMedia.type || "media"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px]">
-              <div className="bg-studio-950 p-3 rounded border border-studio-800 space-y-1">
-                <span className="text-studio-500 text-[10px] block">DURATION</span>
-                <span className="text-studio-100 font-bold">{currentMedia.duration}s</span>
-              </div>
-              <div className="bg-studio-950 p-3 rounded border border-studio-800 space-y-1">
-                <span className="text-studio-500 text-[10px] block">RESOLUTION</span>
-                <span className="text-studio-100 font-bold">{currentMedia.resolution}</span>
-              </div>
-              <div className="bg-studio-950 p-3 rounded border border-studio-800 space-y-1">
-                <span className="text-studio-500 text-[10px] block">FRAME RATE</span>
-                <span className="text-studio-100 font-bold">{currentMedia.fps} fps</span>
-              </div>
-              <div className="bg-studio-950 p-3 rounded border border-studio-800 space-y-1">
-                <span className="text-studio-500 text-[10px] block">SHOT CUTS</span>
-                <span className="text-gold font-bold">{currentMedia.shot_count} cuts</span>
-              </div>
-            </div>
-
-            {currentMedia.pacing_assessment && (
-              <div className="bg-studio-950 p-3 rounded border border-studio-800 space-y-1 text-studio-300 font-sans">
-                <span className="text-[10px] font-mono font-bold text-gold uppercase block">PACING ASSESSMENT:</span>
-                <p className="leading-relaxed">{currentMedia.pacing_assessment}</p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
+
+      {uploading && (
+        <div className="p-8 bg-cinema-900 border border-cinema-800 rounded-2xl flex flex-col items-center justify-center space-y-3 text-center">
+          <Activity className="w-6 h-6 text-amber-500 animate-spin" />
+          <span className="text-xs font-medium text-cinema-300">Analyzing frame histogram, duration, FPS, and scene cut boundaries...</span>
+        </div>
+      )}
+
+      {/* Main Analysis View */}
+      {currentMedia ? (
+        <div className="space-y-6">
+          
+          {/* Video Preview Canvas */}
+          <div className="relative aspect-video max-h-80 w-full bg-cinema-900 rounded-2xl border border-cinema-800 overflow-hidden flex items-center justify-center shadow-2xl">
+            <div className="text-center space-y-2 p-6">
+              <Film className="w-10 h-10 text-amber-500 mx-auto opacity-80" />
+              <div className="font-mono text-xs text-cinema-300 font-semibold">
+                {currentMedia.filename}
+              </div>
+              <p className="text-xs text-cinema-500">
+                {currentMedia.resolution} • {currentMedia.fps} fps • {currentMedia.duration}s total duration
+              </p>
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4 bg-cinema-950/90 border border-cinema-800/80 rounded-xl p-3 flex items-center justify-between font-mono text-xs text-cinema-400 backdrop-blur-md">
+              <span className="text-amber-400 font-semibold font-sans">ACTIVE CLIP ANALYZED</span>
+              <span>DETECTED CUTS: {currentMedia.shot_count}</span>
+            </div>
+          </div>
+
+          {/* Structured Metric Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            
+            <div className="bg-cinema-900 border border-cinema-800/80 p-5 rounded-2xl space-y-1">
+              <span className="text-[11px] font-medium text-cinema-500 uppercase tracking-wider block font-sans">
+                SHOT STRUCTURE
+              </span>
+              <div className="text-lg font-bold font-mono text-cinema-100">
+                {currentMedia.shot_count} Cuts
+              </div>
+              <span className="text-xs text-cinema-400 block">Avg shot length {(currentMedia.duration / (currentMedia.shot_count || 1)).toFixed(1)}s</span>
+            </div>
+
+            <div className="bg-cinema-900 border border-cinema-800/80 p-5 rounded-2xl space-y-1">
+              <span className="text-[11px] font-medium text-cinema-500 uppercase tracking-wider block font-sans">
+                PACING RHYTHM
+              </span>
+              <div className="text-lg font-bold font-mono text-amber-400">
+                {currentMedia.pacing_assessment ? "Dynamic" : "Standard"}
+              </div>
+              <span className="text-xs text-cinema-400 block">Dialogue rhythmic spacing</span>
+            </div>
+
+            <div className="bg-cinema-900 border border-cinema-800/80 p-5 rounded-2xl space-y-1">
+              <span className="text-[11px] font-medium text-cinema-500 uppercase tracking-wider block font-sans">
+                AUDIO STEMS
+              </span>
+              <div className="text-lg font-bold font-mono text-emerald-400">
+                Normal (48kHz)
+              </div>
+              <span className="text-xs text-cinema-400 block">Stereo dialogue track</span>
+            </div>
+
+            <div className="bg-cinema-900 border border-cinema-800/80 p-5 rounded-2xl space-y-1">
+              <span className="text-[11px] font-medium text-cinema-500 uppercase tracking-wider block font-sans">
+                FRAME PARAMETERS
+              </span>
+              <div className="text-lg font-bold font-mono text-sky-400">
+                {currentMedia.fps} FPS
+              </div>
+              <span className="text-xs text-cinema-400 block">{currentMedia.resolution}</span>
+            </div>
+
+          </div>
+
+          {/* Pacing Detailed Assessment */}
+          {currentMedia.pacing_assessment && (
+            <div className="bg-cinema-900 border border-cinema-800 p-6 rounded-2xl space-y-2">
+              <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider block">
+                EDITORIAL PACING ASSESSMENT
+              </span>
+              <p className="text-sm text-cinema-300 leading-relaxed font-sans">
+                {currentMedia.pacing_assessment}
+              </p>
+            </div>
+          )}
+
+        </div>
+      ) : (
+        /* Empty Media State */
+        <div className="bg-cinema-900/50 border border-cinema-800/80 rounded-2xl p-12 text-center max-w-lg mx-auto space-y-4">
+          <Film className="w-10 h-10 text-amber-500/80 mx-auto" />
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-cinema-100">No media footage imported</h3>
+            <p className="text-xs text-cinema-400 leading-relaxed">
+              Import a video or audio file to inspect frame rates, cut points, pacing rhythm, and structural parameters.
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

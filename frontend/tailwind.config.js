@@ -7,21 +7,32 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"IBM Plex Sans"', '-apple-system', 'sans-serif'],
+        sans: ['"IBM Plex Sans"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
+        cinema: {
+          950: '#0d0e12', // Base dark background
+          900: '#14151c', // Card / Surface
+          850: '#1a1b24', // Hover surface
+          800: '#222430', // Divider / Border
+          700: '#2d3040', // Highlight border
+          500: '#71788a', // Muted text
+          400: '#9ca3b5', // Secondary text
+          100: '#f0f2f6', // Primary warm text
+          accent: '#d97706', // Warm amber accent
+        },
         studio: {
-          950: '#0c0d10',
-          900: '#14161c',
-          850: '#181b22',
-          800: '#20242e',
-          750: '#262a37',
-          700: '#2d3242',
-          600: '#3f4559',
-          500: '#686f82',
-          400: '#9ea4b5',
-          100: '#e6e9f0'
+          950: '#0d0e12',
+          900: '#14151c',
+          850: '#1a1b24',
+          800: '#222430',
+          750: '#292d3b',
+          700: '#323647',
+          600: '#484e63',
+          500: '#71788a',
+          400: '#9ca3b5',
+          100: '#f0f2f6'
         },
         gold: {
           DEFAULT: '#d97706',

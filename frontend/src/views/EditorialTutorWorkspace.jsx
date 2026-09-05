@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Clapperboard, Paperclip, MessageSquare, CornerDownLeft } from 'lucide-react';
+import { Sparkles, Paperclip, ArrowUpRight, CornerDownLeft, RefreshCw, SlidersHorizontal, Film, HelpCircle } from 'lucide-react';
 
 export default function EditorialTutorWorkspace({ 
   messages, loading, onSendMessage, currentMedia, onMediaAnalyzed,
@@ -8,12 +8,15 @@ export default function EditorialTutorWorkspace({
   const [inputQuery, setInputQuery] = useState('');
   const messagesEndRef = useRef(null);
 
-  const historyItems = [
-    "Dialogue J-Cut Lead Time",
-    "Velocity Speed Ramping",
-    "Pacing & Shot Duration",
-    "Color Grading Contrast",
-    "Cross-cutting Suspense"
+  const quickStartPrompts = [
+    "How should I cut this dialogue scene?",
+    "How can I improve the pacing?",
+    "Which editing approach suits this scene?",
+    "Analyze my footage"
+  ];
+
+  const categories = [
+    "Pacing", "Dialogue", "Transitions", "Sound", "Color", "Storytelling", "Style"
   ];
 
   const scrollToBottom = () => {
@@ -31,132 +34,201 @@ export default function EditorialTutorWorkspace({
     setInputQuery('');
   };
 
-  const handleHistoryClick = (item) => {
+  const handleQuickClick = (promptText) => {
     if (loading) return;
-    onSendMessage(`Explain ${item}`);
+    onSendMessage(promptText);
   };
 
   return (
-    <div className="flex-1 flex gap-1 h-full min-h-[620px] overflow-hidden select-none font-sans">
+    <div className="h-full flex flex-col bg-cinema-950 overflow-hidden font-sans">
       
-      {/* LEFT EDITORIAL CONSULTATION HISTORY SIDEBAR */}
-      <div className="w-56 bg-studio-900 border-r border-studio-800 flex flex-col h-full text-xs shrink-0 hidden md:flex">
-        <div className="h-9 bg-studio-850 px-3 border-b border-studio-800 flex items-center justify-between font-mono text-[10px] font-bold text-studio-400 uppercase tracking-wider">
-          <span className="flex items-center gap-1.5">
-            <MessageSquare className="w-3.5 h-3.5 text-gold" />
-            CONSULTATIONS
-          </span>
-        </div>
-
-        <div className="p-2 space-y-1 overflow-y-auto flex-1 font-mono text-[11px]">
-          <span className="text-[10px] text-studio-500 uppercase font-bold px-2 py-1 block">RECENT REVIEWS</span>
-          {historyItems.map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleHistoryClick(item)}
-              className="w-full text-left px-2.5 py-1.5 rounded text-studio-400 hover:text-studio-100 hover:bg-studio-800 truncate transition-colors font-sans font-medium"
-            >
-              • {item}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* MAIN EDITORIAL CONSULTATION WORKSPACE */}
-      <div className="flex-1 bg-studio-950 border border-studio-800 rounded flex flex-col h-full overflow-hidden">
-        
-        {/* Workspace Toolbar Header */}
-        <div className="h-9 bg-studio-900 px-4 border-b border-studio-800 flex items-center justify-between font-mono text-[11px] text-studio-400 uppercase font-bold">
-          <span>EDITORIAL CONSULTATION WORKSPACE</span>
-          <span className="text-gold">{userSkill} MODE</span>
-        </div>
-
-        {/* Editorial Feed */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-3 max-w-lg mx-auto">
-              <div className="w-12 h-12 rounded bg-studio-900 border border-studio-800 flex items-center justify-center text-gold font-mono font-bold text-lg">
-                ED
+      {/* 1. TUTOR WELCOME / HOME STATE (When no messages sent yet) */}
+      {messages.length === 0 ? (
+        <div className="flex-1 overflow-y-auto flex items-center justify-center p-6">
+          <div className="w-full max-w-2xl space-y-8 py-8">
+            
+            {/* Centered Welcome Header */}
+            <div className="space-y-3 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>EDITORIAL ASSISTANT</span>
               </div>
-              <h2 className="text-base font-bold text-studio-100 uppercase tracking-wider font-mono">
-                EDITORIAL CONSULTATION
-              </h2>
-              <p className="text-xs text-studio-400 leading-relaxed font-sans">
-                Submit an editing query below to receive professional editorial guidance, narrative rationale, and step-by-step NLE execution notes.
-              </p>
+
+              <h1 className="text-3xl md:text-4xl font-semibold text-cinema-100 tracking-tight font-sans">
+                How can I help with your edit?
+              </h1>
+
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs text-cinema-400">
+                <span className="text-cinema-500 font-medium">Ask about:</span>
+                {categories.map((cat, i) => (
+                  <span key={i} className="px-2.5 py-0.5 rounded-md bg-cinema-900 border border-cinema-800 text-cinema-300 font-medium">
+                    {cat}
+                  </span>
+                ))}
+              </div>
             </div>
-          ) : (
-            messages.map((msg, idx) => (
-              <div key={idx} className="space-y-2">
-                <div className="font-mono text-[10px] uppercase font-bold text-studio-500 tracking-wider flex items-center justify-between">
-                  <span>{msg.sender === 'user' ? 'EDITOR QUERY' : 'EDITORIAL RECOMMENDATION & NOTES'}</span>
-                  {msg.sender === 'tutor' && (
-                    <span className="text-gold font-normal">STATION NOTE #{idx}</span>
-                  )}
-                </div>
 
-                <div
-                  className={`p-4 rounded text-xs md:text-sm leading-relaxed ${
-                    msg.sender === 'user'
-                      ? 'bg-studio-850 text-studio-100 border border-studio-750 font-medium max-w-2xl'
-                      : 'bg-studio-900 text-studio-100 border border-studio-800 font-sans whitespace-pre-wrap space-y-3'
-                  }`}
+            {/* Prompt Input Form */}
+            <form onSubmit={handleSubmit} className="relative bg-cinema-900 border border-cinema-800 focus-within:border-amber-500/50 rounded-2xl p-3 shadow-2xl transition-all space-y-3">
+              <textarea
+                value={inputQuery}
+                onChange={(e) => setInputQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
+                placeholder="What are you trying to achieve with this edit?"
+                disabled={loading}
+                rows={3}
+                className="w-full bg-transparent text-cinema-100 placeholder-cinema-500 text-sm focus:outline-none resize-none font-sans leading-relaxed px-2 pt-1"
+              />
+
+              <div className="flex items-center justify-between pt-2 border-t border-cinema-800/60">
+                <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cinema-950 hover:bg-cinema-850 text-cinema-400 hover:text-cinema-100 border border-cinema-800 text-xs font-medium cursor-pointer transition-colors" title="Attach Media Footage">
+                  <Paperclip className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Attach Footage</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="video/*,audio/*,image/*"
+                    onChange={(e) => {
+                      if (e.target.files[0]) {
+                        const formData = new FormData();
+                        formData.append("file", e.target.files[0]);
+                        fetch("/api/upload", { method: "POST", body: formData })
+                          .then((res) => res.json())
+                          .then((data) => onMediaAnalyzed(data.media_info));
+                      }
+                    }}
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={loading || !inputQuery.trim()}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-cinema-950 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md"
                 >
-                  {msg.text}
-                </div>
+                  <span>Consult Assistant</span>
+                  <CornerDownLeft className="w-3.5 h-3.5" />
+                </button>
               </div>
-            ))
-          )}
+            </form>
+
+            {/* Quick Start Suggestions */}
+            <div className="space-y-3">
+              <span className="text-xs font-medium text-cinema-500 uppercase tracking-wider block font-sans">
+                Quick Start Prompts
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {quickStartPrompts.map((prompt, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleQuickClick(prompt)}
+                    className="text-left p-3 rounded-xl bg-cinema-900/60 hover:bg-cinema-900 border border-cinema-800/80 hover:border-cinema-700 text-cinema-300 hover:text-cinema-100 text-xs transition-all flex items-center justify-between group font-medium"
+                  >
+                    <span>{prompt}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 text-cinema-500 group-hover:text-amber-500 transition-colors shrink-0 ml-2" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      ) : (
+        /* 2. EDITORIAL CONSULTATION RESPONSE STATE */
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 max-w-4xl mx-auto w-full">
+          {messages.map((msg, idx) => (
+            <div key={idx} className="space-y-3">
+              {msg.sender === 'user' ? (
+                /* Editor Query Header */
+                <div className="bg-cinema-900 border border-cinema-800 p-5 rounded-2xl space-y-1">
+                  <span className="text-xs font-medium text-amber-500 uppercase tracking-wider block font-sans">
+                    EDITOR QUESTION
+                  </span>
+                  <h2 className="text-base md:text-lg font-semibold text-cinema-100 font-sans">
+                    {msg.text}
+                  </h2>
+                </div>
+              ) : (
+                /* Professional Editorial Guidance Response */
+                <div className="bg-cinema-900/70 border border-cinema-800 p-6 md:p-8 rounded-2xl space-y-6 text-cinema-100 leading-relaxed font-sans shadow-xl">
+                  <div className="flex items-center justify-between border-b border-cinema-800 pb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                      <span className="text-xs font-semibold text-cinema-300 uppercase tracking-wider">
+                        EDITORIAL GUIDANCE & ANALYSIS
+                      </span>
+                    </div>
+                    <span className="text-xs text-cinema-500 font-mono">
+                      {userSkill} Mode
+                    </span>
+                  </div>
+
+                  <div className="prose prose-invert max-w-none text-sm leading-relaxed font-sans space-y-4">
+                    {msg.text}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
 
           {loading && (
-            <div className="p-4 bg-studio-900 border border-studio-800 rounded font-mono text-xs text-gold flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-gold animate-ping"></span>
-              <span>Synthesizing Editorial Recommendations & NLE Execution Notes...</span>
+            <div className="p-6 bg-cinema-900 border border-cinema-800 rounded-2xl flex items-center justify-center gap-3 text-xs text-amber-400 font-sans font-medium">
+              <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
+              <span>Analyzing edit structure & synthesizing editorial guidance...</span>
             </div>
           )}
+          
           <div ref={messagesEndRef} />
         </div>
+      )}
 
-        {/* Input Footer */}
-        <form onSubmit={handleSubmit} className="p-3 bg-studio-900 border-t border-studio-800 flex gap-2">
-          <label className="p-2.5 rounded bg-studio-850 border border-studio-750 text-studio-400 hover:text-studio-100 cursor-pointer" title="Attach Footage">
-            <Paperclip className="w-4 h-4" />
+      {/* 3. INPUT FOOTER (When consultation in progress) */}
+      {messages.length > 0 && (
+        <div className="p-4 bg-cinema-950 border-t border-cinema-800/80">
+          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-2">
+            <label className="p-2.5 rounded-xl bg-cinema-900 border border-cinema-800 text-cinema-400 hover:text-cinema-100 cursor-pointer transition-colors" title="Attach Footage">
+              <Paperclip className="w-4 h-4 text-amber-500" />
+              <input
+                type="file"
+                className="hidden"
+                accept="video/*,audio/*,image/*"
+                onChange={(e) => {
+                  if (e.target.files[0]) {
+                    const formData = new FormData();
+                    formData.append("file", e.target.files[0]);
+                    fetch("/api/upload", { method: "POST", body: formData })
+                      .then((res) => res.json())
+                      .then((data) => onMediaAnalyzed(data.media_info));
+                  }
+                }}
+              />
+            </label>
+
             <input
-              type="file"
-              className="hidden"
-              accept="video/*,audio/*,image/*"
-              onChange={(e) => {
-                if (e.target.files[0]) {
-                  const formData = new FormData();
-                  formData.append("file", e.target.files[0]);
-                  fetch("/api/upload", { method: "POST", body: formData })
-                    .then((res) => res.json())
-                    .then((data) => onMediaAnalyzed(data.media_info));
-                }
-              }}
+              type="text"
+              value={inputQuery}
+              onChange={(e) => setInputQuery(e.target.value)}
+              placeholder="Ask a follow-up question about your edit..."
+              disabled={loading}
+              className="flex-1 bg-cinema-900 border border-cinema-800 rounded-xl px-4 py-2 text-xs text-cinema-100 placeholder-cinema-500 focus:outline-none focus:border-amber-500/50 font-sans font-medium"
             />
-          </label>
 
-          <input
-            type="text"
-            value={inputQuery}
-            onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask about your edit (e.g. 'How should I handle dialogue pacing in this scene?')..."
-            disabled={loading}
-            className="flex-1 bg-studio-950 border border-studio-800 rounded px-3 py-2 text-xs text-studio-100 placeholder-studio-500 focus:outline-none focus:border-gold font-sans font-medium"
-          />
+            <button
+              type="submit"
+              disabled={loading || !inputQuery.trim()}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-cinema-950 font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5"
+            >
+              <span>Submit</span>
+              <CornerDownLeft className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        </div>
+      )}
 
-          <button
-            type="submit"
-            disabled={loading || !inputQuery.trim()}
-            className="px-4 py-2 bg-gold hover:bg-gold-dark disabled:opacity-30 text-studio-950 font-bold font-mono text-xs rounded transition-colors flex items-center gap-1.5"
-          >
-            <span>SUBMIT</span>
-            <CornerDownLeft className="w-3.5 h-3.5" />
-          </button>
-        </form>
-
-      </div>
     </div>
   );
 }

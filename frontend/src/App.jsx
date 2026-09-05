@@ -11,7 +11,7 @@ import EditorialProfileWorkstation from './views/EditorialProfileWorkstation';
 import MasterTimelineWorkstation from './views/MasterTimelineWorkstation';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('tutor'); // Default view: NLE Editorial Tutor
+  const [activeView, setActiveView] = useState('tutor');
   const [userSkill, setUserSkill] = useState('Beginner');
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
 
@@ -55,7 +55,7 @@ export default function App() {
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { sender: 'tutor', text: `ERROR PROCESSING REQUEST: ${err.message}` },
+        { sender: 'tutor', text: `Unable to complete request: ${err.message}` },
       ]);
     } finally {
       setLoading(false);
@@ -75,9 +75,9 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-studio-950 text-studio-100 flex flex-col overflow-hidden select-none font-sans">
+    <div className="h-screen w-screen bg-cinema-950 text-cinema-100 flex flex-col overflow-hidden select-none font-sans">
       
-      {/* 1. TOP STUDIO HEADER */}
+      {/* 1. COMPACT TOP HEADER */}
       <TopBar
         userSkill={userSkill}
         setUserSkill={setUserSkill}
@@ -85,14 +85,14 @@ export default function App() {
         isDiagnosticsOpen={isDiagnosticsOpen}
       />
 
-      {/* 2. MAIN WORKSTATION WORKSPACE AREA */}
+      {/* 2. MAIN WORKSPACE SHELL */}
       <div className="flex-1 flex overflow-hidden relative">
         
-        {/* NLE Left Narrow Tool Rail */}
+        {/* Left Minimal Tool Rail */}
         <ToolRail activeTool={activeView} setActiveTool={setActiveView} />
 
-        {/* Central Dynamic Active Workstation */}
-        <main className="flex-1 overflow-hidden relative border-r border-studio-800 bg-studio-950">
+        {/* Central Active Workspace */}
+        <main className="flex-1 overflow-hidden relative bg-cinema-950">
           {activeView === 'tutor' && (
             <EditorialTutorWorkspace
               messages={messages}
@@ -133,16 +133,18 @@ export default function App() {
           )}
         </main>
 
-        {/* Right NLE Inspector Panel */}
-        <EditorialInspector
-          detectedIntent={detectedIntent}
-          selectedComponents={selectedComponents}
-          userSkill={userSkill}
-          currentMedia={currentMedia}
-        />
+        {/* Context Panel (Only when useful in tutor view or when media is loaded) */}
+        {(activeView === 'tutor' && (messages.length > 0 || currentMedia)) && (
+          <EditorialInspector
+            detectedIntent={detectedIntent}
+            selectedComponents={selectedComponents}
+            userSkill={userSkill}
+            currentMedia={currentMedia}
+          />
+        )}
       </div>
 
-      {/* 3. DIAGNOSTICS & REACT PROCESS DRAWER */}
+      {/* 3. ASSISTANT PROCESS DRAWER */}
       <ProcessDiagnosticsDrawer
         isOpen={isDiagnosticsOpen}
         onClose={() => setIsDiagnosticsOpen(false)}
