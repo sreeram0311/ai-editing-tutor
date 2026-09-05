@@ -1,12 +1,13 @@
 import React from 'react';
-import { MessageSquare, Video, Award, User } from 'lucide-react';
+import { MessageSquare, Video, Award, User, Film } from 'lucide-react';
 
 export default function ToolRail({ activeTool, setActiveTool }) {
   const tools = [
-    { id: 'tutor', label: 'Tutor', icon: MessageSquare },
-    { id: 'media', label: 'Media', icon: Video },
-    { id: 'practice', label: 'Practice', icon: Award },
+    { id: 'tutor', label: 'Tutor Assistant', icon: MessageSquare },
+    { id: 'media', label: 'Media Studio', icon: Video },
+    { id: 'practice', label: 'Practice Room', icon: Award },
     { id: 'profile', label: 'Development', icon: User },
+    { id: 'timeline', label: 'NLE Sequence Timeline', icon: Film },
   ];
 
   return (
