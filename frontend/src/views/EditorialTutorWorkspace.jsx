@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Paperclip, ArrowUpRight, CornerDownLeft, RefreshCw, SlidersHorizontal, Film, HelpCircle } from 'lucide-react';
+import EditorialFormattedResponse from '../components/EditorialFormattedResponse';
 
 export default function EditorialTutorWorkspace({ 
   messages, loading, onSendMessage, currentMedia, onMediaAnalyzed,
@@ -145,7 +146,7 @@ export default function EditorialTutorWorkspace({
               {msg.sender === 'user' ? (
                 /* Editor Query Header */
                 <div className="bg-cinema-900 border border-cinema-800 p-5 rounded-2xl space-y-1">
-                  <span className="text-xs font-medium text-amber-500 uppercase tracking-wider block font-sans">
+                  <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider block font-sans">
                     EDITOR QUESTION
                   </span>
                   <h2 className="text-base md:text-lg font-semibold text-cinema-100 font-sans">
@@ -167,9 +168,8 @@ export default function EditorialTutorWorkspace({
                     </span>
                   </div>
 
-                  <div className="prose prose-invert max-w-none text-sm leading-relaxed font-sans space-y-4">
-                    {msg.text}
-                  </div>
+                  {/* Formatted Response with Software Cards */}
+                  <EditorialFormattedResponse rawText={msg.text} userSkill={userSkill} />
                 </div>
               )}
             </div>

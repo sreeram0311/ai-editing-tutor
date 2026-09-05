@@ -25,16 +25,18 @@ export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isD
         {/* Skill Selector */}
         <div className="relative flex items-center gap-1.5 text-xs text-cinema-400">
           <span className="text-cinema-500 font-medium">Skill:</span>
-          <select
-            value={userSkill}
-            onChange={(e) => setUserSkill(e.target.value)}
-            className="bg-cinema-900 text-cinema-100 text-xs font-medium rounded-lg px-2.5 py-1 border border-cinema-800 focus:outline-none focus:border-amber-500/50 cursor-pointer appearance-none pr-6"
-          >
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-          </select>
-          <ChevronDown className="w-3 h-3 text-cinema-400 absolute right-2 pointer-events-none" />
+          <div className="relative">
+            <select
+              value={userSkill}
+              onChange={(e) => setUserSkill(e.target.value)}
+              className="bg-cinema-900 text-amber-400 text-xs font-semibold rounded-lg pl-3 pr-7 py-1 border border-cinema-800 focus:outline-none focus:border-amber-500/50 cursor-pointer appearance-none"
+            >
+              <option value="Beginner" className="bg-cinema-900 text-cinema-100">Beginner</option>
+              <option value="Intermediate" className="bg-cinema-900 text-cinema-100">Intermediate</option>
+              <option value="Advanced" className="bg-cinema-900 text-cinema-100">Advanced</option>
+            </select>
+            <ChevronDown className="w-3 h-3 text-amber-500 absolute right-2 top-2 pointer-events-none" />
+          </div>
         </div>
 
         {/* Assistant Process Drawer Button */}
