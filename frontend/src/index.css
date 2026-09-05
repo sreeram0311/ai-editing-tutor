@@ -1,43 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
+html, body {
   margin: 0;
-  background-color: #0d0e12;
-  color: #f0f2f6;
+  padding: 0;
+  background-color: #0c0d11;
+  color: #f8fafc;
   font-family: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make inputs, textareas, buttons, selects explicitly high-contrast and readable */
+input, textarea, select, button {
+  font-family: inherit;
+  color: #ffffff;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
 }
 
 code, kbd, samp, .font-mono {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
-/* Custom quiet scrollbars */
+/* Custom dark studio scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d0e12;
+  background: #0c0d11;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1c1e27;
+  background: #262938;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2d3d;
+  background: #3b3f54;
 }
 
 ::selection {
-  background: rgba(217, 119, 6, 0.25);
+  background: rgba(217, 119, 6, 0.35);
   color: #ffffff;
 }

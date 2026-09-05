@@ -3,18 +3,18 @@ import { Sparkles, Cpu, ChevronDown } from 'lucide-react';
 
 export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isDiagnosticsOpen }) {
   return (
-    <header className="h-12 bg-cinema-950 border-b border-cinema-800/60 px-6 flex items-center justify-between text-sm select-none shrink-0 z-30 font-sans">
+    <header className="h-14 bg-cinema-950 border-b border-cinema-800 px-6 flex items-center justify-between text-base select-none shrink-0 z-30 font-sans">
       
       {/* Left Application Identifier */}
       <div className="flex items-center gap-3">
-        <div className="w-6 h-6 rounded bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+          <Sparkles className="w-4 h-4" />
         </div>
         <div>
-          <span className="font-semibold text-cinema-100 tracking-tight text-sm font-sans">
+          <span className="font-bold text-white tracking-tight text-base font-sans">
             AI EDITING TUTOR
           </span>
-          <span className="hidden sm:inline text-xs text-cinema-500 ml-2 font-normal">
+          <span className="hidden sm:inline text-xs md:text-sm text-slate-300 ml-3 font-normal">
             Editorial Intelligence for Video Editors
           </span>
         </div>
@@ -23,33 +23,33 @@ export default function TopBar({ userSkill, setUserSkill, toggleDiagnostics, isD
       {/* Right Controls */}
       <div className="flex items-center gap-4">
         {/* Skill Selector */}
-        <div className="relative flex items-center gap-1.5 text-xs text-cinema-400">
-          <span className="text-cinema-500 font-medium">Skill:</span>
+        <div className="relative flex items-center gap-2 text-sm text-slate-300">
+          <span className="text-slate-400 font-medium">Skill:</span>
           <div className="relative">
             <select
               value={userSkill}
               onChange={(e) => setUserSkill(e.target.value)}
-              className="bg-cinema-900 text-amber-400 text-xs font-semibold rounded-lg pl-3 pr-7 py-1 border border-cinema-800 focus:outline-none focus:border-amber-500/50 cursor-pointer appearance-none"
+              className="bg-cinema-900 text-amber-400 text-sm font-semibold rounded-lg pl-3 pr-8 py-1.5 border border-cinema-700 focus:outline-none focus:border-amber-500 cursor-pointer appearance-none"
             >
-              <option value="Beginner" className="bg-cinema-900 text-cinema-100">Beginner</option>
-              <option value="Intermediate" className="bg-cinema-900 text-cinema-100">Intermediate</option>
-              <option value="Advanced" className="bg-cinema-900 text-cinema-100">Advanced</option>
+              <option value="Beginner" className="bg-cinema-900 text-white">Beginner</option>
+              <option value="Intermediate" className="bg-cinema-900 text-white">Intermediate</option>
+              <option value="Advanced" className="bg-cinema-900 text-white">Advanced</option>
             </select>
-            <ChevronDown className="w-3 h-3 text-amber-500 absolute right-2 top-2 pointer-events-none" />
+            <ChevronDown className="w-4 h-4 text-amber-400 absolute right-2.5 top-2.5 pointer-events-none" />
           </div>
         </div>
 
         {/* Assistant Process Drawer Button */}
         <button
           onClick={toggleDiagnostics}
-          className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium transition-all border ${
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all border cursor-pointer ${
             isDiagnosticsOpen
-              ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-              : 'bg-cinema-900 text-cinema-400 hover:text-cinema-100 border-cinema-800 hover:border-cinema-700'
+              ? 'bg-amber-500/10 text-amber-400 border-amber-500/40'
+              : 'bg-cinema-900 text-slate-200 hover:text-white border-cinema-700 hover:border-cinema-600'
           }`}
           title="Inspect Assistant Process"
         >
-          <Cpu className="w-3.5 h-3.5 text-amber-500" />
+          <Cpu className="w-4 h-4 text-amber-400" />
           <span>Assistant Process</span>
         </button>
       </div>
