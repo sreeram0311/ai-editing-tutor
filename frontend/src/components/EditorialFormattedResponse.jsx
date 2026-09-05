@@ -1,60 +1,70 @@
 import React from 'react';
-import { Monitor } from 'lucide-react';
+import { Monitor, Sparkles } from 'lucide-react';
 
 export default function EditorialFormattedResponse({ rawText, userSkill }) {
   if (!rawText) return null;
 
-  // Helper to parse key sections from raw string response
+  // Known NLE Software Titles
+  const knownSoftware = [
+    'Premiere Pro',
+    'DaVinci Resolve',
+    'CapCut',
+    'Final Cut Pro',
+    'Avid Media Composer',
+    'VEGAS Pro',
+    'After Effects',
+    'Filmora'
+  ];
+
+  // Helper to parse key sections from raw string response without duplication
   const parseSections = (text) => {
-    const softwareMatch = text.match(/How to perform in major editing software:\s*(.*)/i);
-    const stylesMatch = text.match(/Recommended Editing Styles:\s*(.*)/i);
-
-    let mainConcept = text;
-    let softwareText = '';
-    let stylesText = '';
-
-    if (softwareMatch) {
-      mainConcept = text.substring(0, softwareMatch.index).trim();
-      if (stylesMatch && stylesMatch.index > softwareMatch.index) {
-        softwareText = text.substring(softwareMatch.index + 'How to perform in major editing software:'.length, stylesMatch.index).trim();
-        stylesText = text.substring(stylesMatch.index + 'Recommended Editing Styles:'.length).trim();
-      } else {
-        softwareText = text.substring(softwareMatch.index + 'How to perform in major editing software:'.length).trim();
-      }
-    } else if (stylesMatch) {
-      mainConcept = text.substring(0, stylesMatch.index).trim();
-      stylesText = text.substring(stylesMatch.index + 'Recommended Editing Styles:'.length).trim();
-    }
-
+    // 1. Extract Software Execution Steps cleanly
     const softwareList = [];
-    if (softwareText) {
-      const swParts = softwareText.split(/(?=-\s*[A-Za-z0-9\s]+:|\b(?:Premiere Pro|DaVinci Resolve|CapCut|Final Cut Pro|Avid Media Composer|VEGAS Pro|After Effects|Filmora):)/gi);
-      swParts.forEach(part => {
-        const cleaned = part.replace(/^-\s*/, '').trim();
-        if (cleaned) {
-          const colonIdx = cleaned.indexOf(':');
-          if (colonIdx !== -1) {
-            const name = cleaned.substring(0, colonIdx).trim();
-            const instruction = cleaned.substring(colonIdx + 1).trim();
-            softwareList.push({ name, instruction });
-          } else {
-            softwareList.push({ name: 'NLE Step', instruction: cleaned });
-          }
+    const seenSoftware = new Set();
+
+    knownSoftware.forEach(swName => {
+      const regex = new RegExp(`(?:-|\\*|•)?\\s*${swName}:\\s*([^\\n\\r-]+)`, 'i');
+      const match = text.match(regex);
+      if (match && match[1] && !seenSoftware.has(swName)) {
+        // Strip out any trailing concept markers if present
+        let instruction = match[1].trim();
+        const conceptIdx = instruction.search(/\b(?:Concept|Category|Definition|Use Case|How to perform|Recommended):/i);
+        if (conceptIdx !== -1) {
+          instruction = instruction.substring(0, conceptIdx).trim();
         }
-      });
+        if (instruction) {
+          seenSoftware.add(swName);
+          softwareList.push({ name: swName, instruction });
+        }
+      }
+    });
+
+    // 2. Extract Recommended Editing Styles if present
+    let stylesText = '';
+    const stylesMatch = text.match(/Recommended Editing Styles:\s*(.*)/i);
+    if (stylesMatch && stylesMatch[1]) {
+      stylesText = stylesMatch[1].trim();
     }
 
-    // Insert section breaks before keywords if missing
+    // 3. Clean Main Concept Text (Remove software execution lines and duplicate concept blocks)
+    let mainConcept = text;
+
+    // Cut off at first occurrence of "How to perform in major editing software:"
+    const howToMatch = mainConcept.match(/How to perform in major editing software:/i);
+    if (howToMatch) {
+      mainConcept = mainConcept.substring(0, howToMatch.index).trim();
+    }
+
+    // Format Markdown bold syntax keywords for clear visual rendering
     const keywords = ['Concept:', 'Category:', 'Definition:', 'Use Case:', 'Why It Works:', 'Rationale:'];
-    let currentMain = mainConcept;
     keywords.forEach(kw => {
-      if (currentMain.includes(kw) && !currentMain.includes(`**${kw}**`)) {
-        currentMain = currentMain.replaceAll(kw, `\n\n**${kw}**`);
+      if (mainConcept.includes(kw) && !mainConcept.includes(`**${kw}**`)) {
+        mainConcept = mainConcept.replaceAll(kw, `\n\n**${kw}**`);
       }
     });
 
     return {
-      conceptText: currentMain.trim(),
+      conceptText: mainConcept.trim(),
       softwareList,
       stylesText
     };
@@ -69,7 +79,7 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
     return parts.map((part, idx) => {
       if (shortcutRegex.test(part)) {
         return (
-          <kbd key={idx} className="px-2.5 py-1 rounded-md bg-[#25283c] border border-amber-500/40 text-amber-300 font-mono text-xs font-bold mx-1 shadow-sm inline-block">
+          <kbd key={idx} className="px-3 py-1 rounded-lg bg-[#25283c] border border-amber-500/40 text-amber-300 font-mono text-xs md:text-sm font-bold mx-1 shadow-sm inline-block">
             {part}
           </kbd>
         );
@@ -78,32 +88,30 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
     });
   };
 
-  // Render paragraphs and strip raw ** markdown syntax cleanly
   const renderConceptParagraph = (paragraph, idx) => {
-    // If paragraph contains markdown bold like **Key:** Value
     if (paragraph.includes('**')) {
       const parts = paragraph.split(/(\*\*[^*]+\*\*)/g);
       return (
-        <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] space-y-1.5 shadow-md">
-          <p className="text-slate-100 leading-relaxed font-sans text-base">
+        <div key={idx} className="bg-[#181a28] p-6 rounded-2xl border border-[#292c3e] space-y-2 shadow-md">
+          <div className="text-slate-100 leading-relaxed font-sans text-base md:text-lg">
             {parts.map((part, pIdx) => {
               if (part.startsWith('**') && part.endsWith('**')) {
                 const label = part.slice(2, -2).replace(':', '');
                 return (
-                  <span key={pIdx} className="font-bold text-amber-400 mr-2 block text-xs md:text-sm uppercase tracking-wider">
+                  <span key={pIdx} className="font-bold text-amber-400 mr-2 block text-sm uppercase tracking-wider mb-1">
                     {label}
                   </span>
                 );
               }
               return <span key={pIdx}>{part}</span>;
             })}
-          </p>
+          </div>
         </div>
       );
     }
 
     return (
-      <p key={idx} className="text-slate-100 leading-relaxed text-base">
+      <p key={idx} className="text-slate-100 leading-relaxed text-base md:text-lg font-sans">
         {paragraph}
       </p>
     );
@@ -113,14 +121,14 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
     <div className="space-y-6 font-sans">
       
       {/* 1. MAIN EDITORIAL RATIONALE & CONCEPT */}
-      <div className="space-y-4 leading-relaxed text-slate-100 text-base">
+      <div className="space-y-4 leading-relaxed text-slate-100 text-base md:text-lg">
         {conceptText.split('\n\n').map((paragraph, idx) => renderConceptParagraph(paragraph, idx))}
       </div>
 
-      {/* 2. NLE EXECUTION CARDS */}
+      {/* 2. UNIQUE NLE EXECUTION CARDS */}
       {softwareList.length > 0 && (
-        <div className="space-y-4 pt-2">
-          <div className="flex items-center gap-2.5 border-t border-[#252838] pt-5">
+        <div className="space-y-4 pt-3">
+          <div className="flex items-center gap-2.5 border-t border-[#252838] pt-6">
             <Monitor className="w-5 h-5 text-amber-400" />
             <span className="text-sm font-bold text-slate-200 uppercase tracking-wider font-sans">
               NLE SOFTWARE EXECUTION STEPS
@@ -129,13 +137,13 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {softwareList.map((sw, idx) => (
-              <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] hover:border-amber-500/40 space-y-2 shadow-md transition-all">
-                <div className="flex items-center justify-between border-b border-[#252838] pb-2">
-                  <span className="text-base font-bold text-white font-sans">
+              <div key={idx} className="bg-[#181a28] p-6 rounded-2xl border border-[#292c3e] hover:border-amber-500/40 space-y-3 shadow-md transition-all">
+                <div className="flex items-center justify-between border-b border-[#252838] pb-2.5">
+                  <span className="text-lg font-bold text-white font-sans">
                     {sw.name}
                   </span>
                 </div>
-                <p className="text-sm text-slate-200 leading-relaxed font-sans pt-1">
+                <p className="text-base text-slate-100 leading-relaxed font-sans pt-1">
                   {renderFormattedInstruction(sw.instruction)}
                 </p>
               </div>
@@ -146,11 +154,11 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
 
       {/* 3. RECOMMENDED STYLES & ATMOSPHERE */}
       {stylesText && (
-        <div className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] space-y-2 pt-4 shadow-md">
+        <div className="bg-[#181a28] p-6 rounded-2xl border border-[#292c3e] space-y-2 pt-4 shadow-md">
           <span className="text-sm font-bold text-amber-400 uppercase tracking-wider block font-sans">
             RECOMMENDED EDITING STYLES
           </span>
-          <p className="text-sm text-slate-200 leading-relaxed font-sans">
+          <p className="text-base text-slate-100 leading-relaxed font-sans">
             {stylesText}
           </p>
         </div>
