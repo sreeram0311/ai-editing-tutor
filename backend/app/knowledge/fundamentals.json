@@ -1,0 +1,34 @@
+{
+  "fundamentals": [
+    {
+      "term": "Shot Duration",
+      "definition": "The exact length of time a single continuous camera take remains on screen before cutting.",
+      "pacing_impact": "Shorter durations (< 3s) create tension, energy, or confusion; longer durations (> 7s) establish calm, drama, or focus."
+    },
+    {
+      "term": "Pacing",
+      "definition": "The rhythm and temporal speed at which scenes and cuts progress throughout a video sequence.",
+      "pacing_impact": "Good pacing matches visual cuts to sound accents, narrative intent, and emotional beats."
+    },
+    {
+      "term": "Continuity",
+      "definition": "Maintaining consistent spatial, temporal, and action relationships across cuts (e.g., 180-degree rule, eyeline matching, matching action).",
+      "pacing_impact": "Prevents jarring viewer disorientation unless intentionally broken for stylistic effect."
+    },
+    {
+      "term": "Rhythm",
+      "definition": "The structured timing of edits in relation to speech cadence, background music, or motion within the frame.",
+      "pacing_impact": "Gives the edit a musical or pulse-like flow."
+    },
+    {
+      "term": "Transitions",
+      "definition": "Techniques used to bridge the gap between two separate video clips or scenes.",
+      "pacing_impact": "Dictates energy flow—hard cuts maintain momentum, fades signify passage of time, and whip pans create dynamic momentum."
+    },
+    {
+      "term": "Story Structure",
+      "definition": "The narrative organization of footage into setup, rising action, climax, and resolution.",
+      "pacing_impact": "Guides viewer attention and emotional investment."
+    }
+  ]
+}

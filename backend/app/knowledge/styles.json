@@ -1,0 +1,140 @@
+{
+  "styles": [
+    {
+      "name": "Cinematic",
+      "pacing": "Deliberate, varied shot durations (4s - 10s)",
+      "sound_design": "Rich ambient soundscapes, orchestral/atmospheric music, seamless J/L-cuts",
+      "color": "Teal & Orange / desaturated contrast, 24fps cinematic motion blur",
+      "best_for": "Narratives, dramatic shorts, high-production b-roll showcases",
+      "recommended_techniques": ["L-cut", "Match Cut", "Color Grading", "Subtle Speed Ramping"]
+    },
+    {
+      "name": "Documentary Storytelling",
+      "pacing": "Observational, conversational flow governed by interview cadence",
+      "sound_design": "Natural dialogue prioritized, subtle score swelling under emotional beats",
+      "color": "Naturalistic color correction, high clarity",
+      "best_for": "Interviews, archival footage, human-interest features",
+      "recommended_techniques": ["J-cut", "B-roll Insertion", "Lower Thirds", "Reaction Shots"]
+    },
+    {
+      "name": "Narrative",
+      "pacing": "Story-driven, scene-dependent pacing following dramatic tension curves",
+      "sound_design": "Foley, spatial dialogue, diegetic and non-diegetic sound integration",
+      "color": "Mood-based grading matching narrative tone",
+      "best_for": "Short films, feature films, scripted drama",
+      "recommended_techniques": ["Cross-cutting", "Match Cut", "L-cut", "Eyeline Match"]
+    },
+    {
+      "name": "YouTube",
+      "pacing": "Fast-paced, minimal downtime, average shot duration 1.5s - 3s",
+      "sound_design": "Upbeat pop/lo-fi background music, punchy sound effects on zooms/text",
+      "color": "Vibrant, high saturation",
+      "best_for": "Personal vlogs, tech reviews, commentary",
+      "recommended_techniques": ["Jump Cut", "Punch-in Zoom", "Sound Effect Accents", "Pop-up Graphics"]
+    },
+    {
+      "name": "Vlog",
+      "pacing": "Casual, fast jump cuts trimming speech pauses",
+      "sound_design": "Background lo-fi track, casual mic audio",
+      "color": "Natural bright look",
+      "best_for": "Daily vlogs, travel diaries, behind-the-scenes",
+      "recommended_techniques": ["Jump Cut", "B-roll Cutaway", "Text Overlays"]
+    },
+    {
+      "name": "Educational",
+      "pacing": "Structured, medium pacing (3s - 5s shot duration with B-roll cutaways)",
+      "sound_design": "Crystal clear voiceover, low ambient background track",
+      "color": "Clean neutral balance",
+      "best_for": "Tutorials, online courses, corporate presentations",
+      "recommended_techniques": ["B-roll Overlay", "J-cut", "Screen Recording Cutaway", "Diagrams"]
+    },
+    {
+      "name": "Talking-head",
+      "pacing": "Dialogue-centric, multi-cam switching or punch-in zooms to hold attention",
+      "sound_design": "Isolating dialogue stem, noise suppression",
+      "color": "Clean portrait lighting & skin-tone grading",
+      "best_for": "Interviews, YouTube commentary, corporate messages",
+      "recommended_techniques": ["Multi-cam Cut", "Punch-in Zoom", "L-cut"]
+    },
+    {
+      "name": "Social Media / Short-form",
+      "pacing": "Ultra-fast, hook within first 2 seconds, cuts every 1-2 seconds",
+      "sound_design": "Trending audio sync, voiceover captions",
+      "color": "High contrast, eye-catching color",
+      "best_for": "TikTok, Instagram Reels, YouTube Shorts",
+      "recommended_techniques": ["Speed Ramping", "Velocity Editing", "Dynamic Subtitles", "Pattern Interrupts"]
+    },
+    {
+      "name": "Music Video",
+      "pacing": "Rhythmic, perfectly synced to beat spikes, snare hits, and vocal cues",
+      "sound_design": "Mastered song track priority",
+      "color": "Stylized, high-saturation, LUT overlays, neon/gel lighting",
+      "best_for": "Artists, dance videos, performance montages",
+      "recommended_techniques": ["Velocity Editing", "Beat Syncing", "Strobe Cut", "Glitch Transitions"]
+    },
+    {
+      "name": "Commercial",
+      "pacing": "Tight 15s/30s timing, high visual energy and product focus",
+      "sound_design": "Custom sound branding, voiceover, energetic sound design drops",
+      "color": "Polished high-end commercial grade",
+      "best_for": "Brand promo, product spots, ads",
+      "recommended_techniques": ["Speed Ramp", "Macro Close-up Cuts", "Graphic Callouts"]
+    },
+    {
+      "name": "Interview",
+      "pacing": "Conversational, respecting speaker pauses while cutting clutter",
+      "sound_design": "Dialogue priority, background atmosphere",
+      "color": "Natural skin tones",
+      "best_for": "Documentaries, corporate showcases",
+      "recommended_techniques": ["A/B Roll Cut", "J-cut", "L-cut"]
+    },
+    {
+      "name": "Fast-paced",
+      "pacing": "High cut frequency (< 2s avg shot duration)",
+      "sound_design": "High energy music, punchy impacts",
+      "color": "High saturation/contrast",
+      "best_for": "Trailers, sports reels, gaming montages",
+      "recommended_techniques": ["Smash Cut", "Jump Cut", "Velocity Ramp"]
+    },
+    {
+      "name": "Slow-paced",
+      "pacing": "Contemplative, long takes (> 8s avg shot duration)",
+      "sound_design": "Subtle ambient soundscapes, minimal score",
+      "color": "Muted, naturalistic tones",
+      "best_for": "Art house, meditation, nature films",
+      "recommended_techniques": ["Long Take", "Fade Cut", "L-cut"]
+    },
+    {
+      "name": "Minimalist",
+      "pacing": "Clean, unhurried, emphasizing negative space and uncluttered frames",
+      "sound_design": "Silence as a tool, acoustic accents",
+      "color": "Monochromatic or soft desaturated palette",
+      "best_for": "Architecture, luxury brands, poetry films",
+      "recommended_techniques": ["Straight Cut", "Static Framing"]
+    },
+    {
+      "name": "Experimental",
+      "pacing": "Unconventional, breaking standard continuity and rhythm rules",
+      "sound_design": "Abstract soundscapes, distorted audio",
+      "color": "Inverted colors, heavy grain, film burn FX",
+      "best_for": "Avant-garde, fashion films, music visualizers",
+      "recommended_techniques": ["Discontinuity Cut", "Match Cut", "Jump Cut"]
+    },
+    {
+      "name": "Montage-driven",
+      "pacing": "Rhythmic compilation of thematic clips over music",
+      "sound_design": "Music track driven",
+      "color": "Cohesive LUT grade across diverse clips",
+      "best_for": "Recaps, transformation sequences, travel edits",
+      "recommended_techniques": ["Beat Sync", "Match Cut", "Speed Ramp"]
+    },
+    {
+      "name": "Storytelling-focused",
+      "pacing": "Balanced around emotional narrative arcs",
+      "sound_design": "Layered audio supporting character motivation",
+      "color": "Narrative arc grading shift",
+      "best_for": "Documentary, drama, personal essays",
+      "recommended_techniques": ["J-cut", "L-cut", "B-roll Insertion", "Cross-cutting"]
+    }
+  ]
+}

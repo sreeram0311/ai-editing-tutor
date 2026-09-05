@@ -1,0 +1,109 @@
+{
+  "techniques": [
+    {
+      "name": "Straight Cut",
+      "category": "Cutting Techniques",
+      "definition": "The most fundamental edit where one shot immediately replaces another without optical transitions or sound overlaps.",
+      "use_case": "Standard dialogue, narrative progression, seamless continuity editing.",
+      "example": "Cutting from a person looking left to what they are looking at on the right."
+    },
+    {
+      "name": "J-cut",
+      "category": "Sound Editing",
+      "definition": "An edit where the audio of the upcoming shot precedes the visual cut (the viewer hears clip B before seeing clip B).",
+      "use_case": "Smooth dialogue transitions, introducing new scenes fluidly without abrupt hard cuts.",
+      "example": "Hearing a character start talking or a train whistle while still looking at the previous room."
+    },
+    {
+      "name": "L-cut",
+      "category": "Sound Editing",
+      "definition": "An edit where the audio from the preceding shot continues playing over the visual cut into the next shot.",
+      "use_case": "Showing reaction shots while speaker audio continues, creating emotional resonance.",
+      "example": "Character A continues speaking while visual cuts to Character B's listening facial reaction."
+    },
+    {
+      "name": "Velocity Editing / Speed Ramping",
+      "category": "Visual Techniques",
+      "definition": "Dynamically changing playback speed within a single clip (e.g. fast-forwarding during movement, then slowing down to 100% or 24% at the point of action).",
+      "use_case": "AMVs, montage edits, action sports, high-energy gaming or TikTok transitions.",
+      "example": "Dancer jumping: clip speeds up 3x during spin, ramps to slow-motion (50%) at peak landing, then snaps back to normal speed."
+    },
+    {
+      "name": "Jump Cut",
+      "category": "Cutting Techniques",
+      "definition": "A cut between two sequential shots of the same subject taken from almost identical camera angles.",
+      "use_case": "Showing passage of time, high-energy YouTube/vlog edits, creating jarring urgency.",
+      "example": "Vlogger speaking where pauses are trimmed out rapidly."
+    },
+    {
+      "name": "Match Cut",
+      "category": "Cutting Techniques",
+      "definition": "A cut between two different objects, spaces, or compositions that match visually or action-wise.",
+      "use_case": "Establishing thematic connection or seamless transition between scenes.",
+      "example": "Cutting from a spinning bone thrown into the air to a spinning satellite in space."
+    },
+    {
+      "name": "Smash Cut",
+      "category": "Cutting Techniques",
+      "definition": "An abrupt cut from an intense/loud scene to a tranquil/quiet scene (or vice versa).",
+      "use_case": "Shock value, comedic timing, waking from a nightmare.",
+      "example": "Cutting instantly from a roaring explosion to a peaceful alarm clock."
+    },
+    {
+      "name": "Cutaway",
+      "category": "Cutting Techniques",
+      "definition": "Cutting away from the main action to a brief shot of a related subject or detail before returning.",
+      "use_case": "Providing context, hiding edits in dialogue, adding narrative detail.",
+      "example": "Cutting to a ticking clock on the wall while two characters argue."
+    },
+    {
+      "name": "Cross-cutting / Parallel Editing",
+      "category": "Cutting Techniques",
+      "definition": "Cutting back and forth between two or more events happening simultaneously in different locations.",
+      "use_case": "Building suspense, drawing thematic parallels between two storylines.",
+      "example": "Showing a detective racing to a location while cutting to the suspect preparing to flee."
+    },
+    {
+      "name": "Montage",
+      "category": "Cutting Techniques",
+      "definition": "A series of short shots edited together to condense time, space, or information.",
+      "use_case": "Training sequences, passage of years, travel highlights.",
+      "example": "Showing an athlete practicing over months in a 30-second sequence set to music."
+    },
+    {
+      "name": "B-roll Insertion",
+      "category": "Visual Techniques",
+      "definition": "Overlaying supplemental or contextual footage over main interview/talking-head A-roll audio.",
+      "use_case": "Illustrating points spoken by speaker, concealing jump cuts in dialogue.",
+      "example": "Speaker mentions 'city traffic' and visual cuts to cars driving down Broadway."
+    },
+    {
+      "name": "Dialogue Editing",
+      "category": "Sound Editing",
+      "definition": "Cleaning, balancing, and pacing spoken audio tracks between actors or speakers.",
+      "use_case": "Ensuring smooth audio levels, removing room noise, and timing pauses for natural cadence.",
+      "example": "Using room tone fill to smooth out background noise between dialogue takes."
+    },
+    {
+      "name": "Ambient Sound & SFX",
+      "category": "Sound Editing",
+      "definition": "Background environmental audio (wind, room rumble) and sound effects (whooshes, risers, impacts).",
+      "use_case": "Immersion, emphasizing cuts with whoosh sounds, selling visual motion.",
+      "example": "Adding a subtle low-frequency riser sound before an action hit."
+    },
+    {
+      "name": "Color Correction & Grading",
+      "category": "Color",
+      "definition": "Color correction balances exposure, white balance, and contrast. Color grading applies artistic color stylization (e.g. Teal & Orange, film stock emulations).",
+      "use_case": "Establishing mood, matching shots from different cameras, creating cinematic looks.",
+      "example": "Lowering color temperature for cool night shots, raising warmth for nostalgic golden hour look."
+    },
+    {
+      "name": "Slow Motion & Freeze Frame",
+      "category": "Visual Techniques",
+      "definition": "Playing back footage recorded at high frame rates (60fps, 120fps) at 24fps or pausing on a single frame.",
+      "use_case": "Emphasizing dramatic moments, sporting achievements, or character introductions.",
+      "example": "Freezing a character frame with a title card overlay."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# Python / Virtual Environment
+backend/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Databases
+backend/*.db
+*.db
+
+# Node / React Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Media Uploads (keep directory, ignore uploaded files)
+media/*
+!media/.gitkeep
+
+# Environment variables
+.env
