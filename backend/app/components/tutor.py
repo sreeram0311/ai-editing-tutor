@@ -1,123 +1,111 @@
 """
-Personalized Tutor Component — Clean Text & Multi-Software Explanations
+Personalized Tutor Component — Comprehensive Editorial Knowledge & Multi-Software Explanations
 Generates clean, plain-text answers mentioning all major editing software steps
 (Premiere Pro, DaVinci Resolve, CapCut, Final Cut Pro, Avid, VEGAS, After Effects, Filmora)
-without extra special characters or messy symbols.
+without duplicated software blocks or messy symbols. Handles direct comparisons & theory.
 """
 from typing import Dict, Any, List
+
+COMPARISONS = {
+    "j-cut vs l-cut": {
+        "title": "J-Cut vs L-Cut Comparison & Rationale",
+        "j_cut": "J-Cut (Audio Lead / Pre-lap): Audio from the upcoming scene begins BEFORE the visual cut. Used to smoothly introduce new scenes and guide viewer attention.",
+        "l_cut": "L-Cut (Audio Lag / Post-lap): Audio from the current scene continues playing AFTER the visual cut to the next shot. Used for showing actor reaction shots while dialogue continues.",
+        "verdict": "Neither is 'better'—they serve opposite storytelling goals. Experienced editors alternate J-cuts and L-cuts to maintain conversational flow.",
+        "software": {
+            "Premiere Pro": "Use Alt + Click to slip audio edges. J-Cut: drag audio left under previous clip. L-Cut: drag audio right under reaction shot.",
+            "DaVinci Resolve": "Use Trim Tool (T) or Alt + Drag audio boundary independently on timeline.",
+            "CapCut": "Tap Extract Audio, then drag audio clip boundary left (J-cut) or right (L-cut).",
+            "Final Cut Pro": "Press Ctrl + S to Expand Audio Components, then drag audio start/end handles.",
+            "Avid Media Composer": "Use Dual Roller Trim Tool (P) on audio tracks A1/A2 while keeping V1 video locked.",
+            "VEGAS Pro": "Press U to unlink video and audio tracks, then drag audio event edges."
+        }
+    },
+    "premiere vs resolve": {
+        "title": "Premiere Pro vs DaVinci Resolve Comparison",
+        "premiere": "Adobe Premiere Pro: Best for industry integration, Adobe Creative Cloud ecosystem (After Effects, Photoshop, Audition), fast timeline editing, and dynamic link.",
+        "resolve": "DaVinci Resolve: World standard for color grading, node-based color workflow, Fairlight audio suite, Fusion visual effects, and one-time Studio license.",
+        "verdict": "DaVinci Resolve is superior for color grading and finishing; Premiere Pro is preferred for motion graphics and seamless Adobe suite workflows.",
+        "software": {
+            "Premiere Pro": "Import raw footage, assemble edit on sequence timeline, use Dynamic Link to send shots to After Effects.",
+            "DaVinci Resolve": "Import media in Cut/Edit page, perform primary/secondary grade in Color page, master audio in Fairlight.",
+            "CapCut": "Ideal for fast mobile/social edits with built-in auto-captions and trending templates.",
+            "Final Cut Pro": "Optimized for Apple Silicon hardware acceleration with magnetic timeline assembly."
+        }
+    },
+    "jump cut vs match cut": {
+        "title": "Jump Cut vs Match Cut Comparison",
+        "jump_cut": "Jump Cut: A cut between two sequential takes of the same subject from almost identical camera angles. Condenses time, creates high-energy pacing, or jarring emphasis.",
+        "match_cut": "Match Cut: A cut between two completely different subjects or spaces that share visual shape, action, or composition. Establishes artistic thematic connections.",
+        "verdict": "Use Jump Cuts for fast YouTube/vlog pacing or passage of time. Use Match Cuts for cinematic transitions and thematic storytelling.",
+        "software": {
+            "Premiere Pro": "Jump Cut: Select razor tool (C), slice unwanted pause, press Shift + Delete (Ripple Delete). Match Cut: Align action frames across V1/V2 tracks.",
+            "DaVinci Resolve": "Jump Cut: Use Blade tool (B) and Ripple Cut (Backspace). Match Cut: Use Split Screen to align shot compositions.",
+            "CapCut": "Jump Cut: Tap Split and Delete unwanted pauses. Match Cut: Use Overlay feature to match framing.",
+            "Final Cut Pro": "Jump Cut: Blade (Cmd + B) and Ripple Delete. Match Cut: Position playhead on matching motion frame."
+        }
+    },
+    "24fps vs 30fps vs 60fps": {
+        "title": "Frame Rate Comparison (24 FPS vs 30 FPS vs 60 FPS)",
+        "fps_24": "24 FPS: Cinema standard. Provides natural motion blur and organic filmic cadence.",
+        "fps_30": "30 FPS: TV broadcast and digital video standard. Slightly crisper motion blur.",
+        "fps_60": "60 FPS / 120 FPS: High temporal resolution. Essential source footage for smooth 25% slow-motion speed ramps without stuttering.",
+        "verdict": "Shoot 24 FPS for cinematic films; shoot 60 FPS / 120 FPS when planning speed ramps or slow-motion action shots.",
+        "software": {
+            "Premiere Pro": "Interpret Footage: Right-click clip > Modify > Interpret Footage > Assume 24.00 fps.",
+            "DaVinci Resolve": "Clip Attributes: Right-click clip > Clip Attributes > Change Video Frame Rate to 24 fps.",
+            "CapCut": "Project Settings: Set Frame Rate to 24fps or 60fps depending on export requirement.",
+            "Final Cut Pro": "Video Inspector: Modify clip retiming to 24fps baseline."
+        }
+    },
+    "prores vs h264": {
+        "title": "ProRes vs H.264 Codec Comparison",
+        "prores": "Apple ProRes (or Avid DNxHR): Intra-frame editing codec. Large file size, zero CPU strain, ultra-smooth timeline playback and scrubbing.",
+        "h264": "H.264 / H.265 (HEVC): Inter-frame delivery codec. Small file size, heavy CPU decoding load, prone to scrubbing lag without proxies.",
+        "verdict": "Edit in ProRes or generate ProRes proxies during editing; export H.264 / H.265 for final web delivery.",
+        "software": {
+            "Premiere Pro": "Ingest Settings: Enable Proxy Ingestion, select ProRes Proxy preset.",
+            "DaVinci Resolve": "Generate Optimized Media: Right-click clips > Generate Proxy Media (ProRes).",
+            "CapCut": "Enable Performance Acceleration in Preferences.",
+            "Final Cut Pro": "Import Options: Check Create Transcoded Media > Proxy Media (ProRes)."
+        }
+    }
+}
 
 SOFTWARE_TUTORIALS = {
     "velocity": {
         "title": "Velocity Editing and Speed Ramping Tutorial",
         "concept": "Velocity editing alters clip playback speed dynamically, accelerating during build-ups and dropping into slow motion at impact beats.",
         "software": {
-            "Premiere Pro": [
-                "1. Right-click clip on timeline, select Show Clip Keyframes, then Time Remapping, then Speed.",
-                "2. Use the Pen Tool (P) to add keyframes on the speed rubber band line.",
-                "3. Drag the line segment before impact up to 300 percent and after impact down to 25 percent.",
-                "4. Pull the split Bezier handles to smooth out the speed curve."
-            ],
-            "DaVinci Resolve": [
-                "1. Select clip and press Cmd/Ctrl + R for Retime Controls or Shift + F6 for Retime Curve.",
-                "2. Click the dropdown arrow on clip header and select Add Speed Point at motion entry.",
-                "3. Set entry segment to 300 percent speed and action segment to 25 percent speed.",
-                "4. Open Inspector, set Retime Process to Optical Flow and Motion Estimation to Speed Warp."
-            ],
-            "CapCut (Desktop and Mobile)": [
-                "1. Select video clip, tap Speed, then tap Curve.",
-                "2. Choose Custom mode or presets like Flash or Hero.",
-                "3. Drag entry beat dots up to 3.0x and impact beat dots down to 0.3x.",
-                "4. Select Make it Smoother and choose Better Quality for optical frame generation."
-            ],
-            "Final Cut Pro": [
-                "1. Select clip and press Shift + B (Blade Speed) at ramp start and end.",
-                "2. Click speed header bar and drag speed slider to 200 percent for buildup and 25 percent for action hit.",
-                "3. Drag smooth transition handles to round out velocity curves."
-            ],
-            "Avid Media Composer": [
-                "1. Open Motion Effect Palette, select Timewarp Effect and apply to clip.",
-                "2. Open Motion Effect Editor and select Speed graph.",
-                "3. Add keyframes on speed graph, curving from 300 percent down to 25 percent.",
-                "4. Set Render FluidMotion to ON for frame interpolation."
-            ],
-            "VEGAS Pro": [
-                "1. Right-click clip, select Insert/Remove Envelope, then click Velocity.",
-                "2. Double-click green velocity line to add keyframes.",
-                "3. Drag line up to 300 percent before action, drop line down to 30 percent at hit beat."
-            ],
-            "After Effects": [
-                "1. Right-click layer, select Time, then Enable Time Remapping (Ctrl+Alt+T).",
-                "2. Set keyframes at action entry and hit point.",
-                "3. Open Graph Editor and drag Bezier handles to create S-curve speed ramp.",
-                "4. Enable Pixel Motion Frame Blending."
-            ],
-            "Filmora": [
-                "1. Select clip, click Speed icon, then select Speed Ramping.",
-                "2. Choose Hero or Customize velocity graph.",
-                "3. Adjust speed keyframe nodes up to 4x and down to 0.25x."
-            ]
+            "Premiere Pro": "Right-click clip > Show Clip Keyframes > Time Remapping > Speed. Add keyframes with Pen Tool (P) and split Bezier handles.",
+            "DaVinci Resolve": "Press Cmd/Ctrl + R for Retime Controls. Add Speed Points, set entry to 300% and impact to 25%. Enable Optical Flow.",
+            "CapCut": "Select clip > Speed > Curve. Drag entry dots to 3.0x and impact dots to 0.3x. Enable Make it Smoother.",
+            "Final Cut Pro": "Press Shift + B (Blade Speed). Set speed header to 200% for buildup and 25% for action hit.",
+            "Avid Media Composer": "Apply Timewarp Effect. Add keyframes on Speed graph, curving from 300% to 25%. Set Render FluidMotion.",
+            "VEGAS Pro": "Right-click clip > Insert/Remove Envelope > Velocity. Add keyframes on velocity line from 300% to 30%."
         },
         "parameters": [
-            "Normal Speed: 100 percent (24fps or 30fps baseline)",
-            "Fast Buildup: 250 to 450 percent speed during movement",
-            "Action Impact Drop: 20 to 35 percent slow-mo (requires 60fps or 120fps source)",
+            "Normal Speed: 100% (24fps baseline)",
+            "Fast Buildup: 250% to 450% speed during movement",
+            "Action Impact Drop: 20% to 35% slow-mo (requires 60fps+ source)",
             "Optical Flow AI: Synthesizes missing frames to prevent stutter"
-        ],
-        "quiz": {
-            "question": "What is required to achieve smooth slow-motion during a velocity drop to 25 percent without jitter?",
-            "options": [
-                "A) Record in high frame rate (60fps or 120fps) or enable Optical Flow interpolation",
-                "B) Increase brightness level by 50 percent",
-                "C) Apply a heavy Gaussian blur"
-            ],
-            "answer": "A) Record in high frame rate (60fps or 120fps) or enable Optical Flow interpolation",
-            "explanation": "Playing 24fps video at 25 percent speed results in only 6 frames per second, causing stutters unless shot in high FPS or processed with Optical Flow frame synthesis."
-        }
+        ]
     },
     "j-cut": {
         "title": "J-Cuts and Audio Lead Transitions Guide",
         "concept": "A J-Cut is an edit where the audio of the upcoming shot precedes the visual cut.",
         "software": {
-            "Premiere Pro": [
-                "1. Alt/Option + Click the audio boundary of Clip B.",
-                "2. Drag the audio edge left into Clip A's timeline space.",
-                "3. Apply 1.0s Constant Power audio crossfade."
-            ],
-            "DaVinci Resolve": [
-                "1. Alt/Option + Drag audio boundary of Clip B left.",
-                "2. Use Trim Tool (T) to slip audio boundary independently."
-            ],
-            "CapCut": [
-                "1. Select Clip B and tap Extract Audio.",
-                "2. Drag audio stem 1.5s to the left under Clip A."
-            ],
-            "Final Cut Pro": [
-                "1. Expand Audio/Video components (Ctrl + S).",
-                "2. Drag audio leading edge to the left."
-            ],
-            "Avid Media Composer": [
-                "1. Select Dual Roller Trim Tool (P).",
-                "2. Deselect Video track V1 and trim Audio track A1/A2 to the left."
-            ],
-            "VEGAS Pro": [
-                "1. Unlink Video and Audio (press U).",
-                "2. Slip audio event left into preceding clip."
-            ]
+            "Premiere Pro": "Alt + Click audio boundary of Clip B. Drag audio edge left into Clip A's space. Apply 1.0s Constant Power crossfade.",
+            "DaVinci Resolve": "Alt + Drag audio boundary of Clip B left. Use Trim Tool (T) to slip audio boundary independently.",
+            "CapCut": "Tap Extract Audio, then drag audio stem 1.5s to the left under Clip A.",
+            "Final Cut Pro": "Press Ctrl + S to Expand Audio Components, then drag audio leading edge left.",
+            "Avid Media Composer": "Select Dual Roller Trim Tool (P). Deselect V1 track and trim Audio A1/A2 left.",
+            "VEGAS Pro": "Press U to unlink Video and Audio. Slip audio event left into preceding clip."
         },
         "parameters": [
             "Audio Lead Time: 1.0s to 2.5s before visual cut",
             "Crossfade Shape: Constant Power (-3dB dip)"
-        ],
-        "quiz": {
-            "question": "Why are J-cuts used in dialogue and documentary editing?",
-            "options": [
-                "A) To guide the viewer's subconscious attention before introducing a new visual scene",
-                "B) To make the video render 2x faster",
-                "C) To invert the color saturation"
-            ],
-            "answer": "A) To guide the viewer's subconscious attention before introducing a new visual scene",
-            "explanation": "Hearing sound before visual cuts prepares the viewer's brain and smooths hard visual cuts."
-        }
+        ]
     }
 }
 
@@ -130,12 +118,40 @@ def format_tutor_response(
     exercise_data: Dict[str, Any] = None
 ) -> str:
     """
-    Synthesizes clean text responses without extra special characters or messy tabs.
+    Synthesizes clean text responses without duplicated software blocks or messy symbols.
     """
     q_lower = query.lower()
-    level = (skill_level or "Beginner").capitalize()
     sections = []
 
+    # 1. Check for specific comparison queries (vs / difference / which is better)
+    comparison_key = None
+    if "j-cut" in q_lower and "l-cut" in q_lower or "j cut vs l cut" in q_lower:
+        comparison_key = "j-cut vs l-cut"
+    elif "premiere" in q_lower and "resolve" in q_lower:
+        comparison_key = "premiere vs resolve"
+    elif "jump cut" in q_lower and "match cut" in q_lower:
+        comparison_key = "jump cut vs match cut"
+    elif "fps" in q_lower or "24fps" in q_lower or "60fps" in q_lower or "frame rate" in q_lower:
+        comparison_key = "24fps vs 30fps vs 60fps"
+    elif "prores" in q_lower or "h264" in q_lower or "codec" in q_lower:
+        comparison_key = "prores vs h264"
+
+    if comparison_key and comparison_key in COMPARISONS:
+        cmp = COMPARISONS[comparison_key]
+        sections.append(f"Concept: {cmp['title']}\n\nOverview:\n")
+        for k, v in cmp.items():
+            if k not in ['title', 'software', 'verdict']:
+                sections.append(f"- {v}")
+        sections.append(f"\nVerdict & Best Use Case: {cmp['verdict']}")
+        
+        sw_text = ["\nHow to perform in major editing software:\n"]
+        for sw_name, instruction in cmp["software"].items():
+            sw_text.append(f"- {sw_name}: {instruction}")
+        sections.append("\n".join(sw_text))
+
+        return "\n\n".join(sections)
+
+    # 2. Check for specialized tutorials (velocity, j-cut)
     tutorial_key = None
     if "velocity" in q_lower or "speed ramp" in q_lower or "slow mo" in q_lower:
         tutorial_key = "velocity"
@@ -144,59 +160,53 @@ def format_tutor_response(
 
     if tutorial_key and tutorial_key in SOFTWARE_TUTORIALS:
         tut = SOFTWARE_TUTORIALS[tutorial_key]
-        sections.append(f"{tut['title']}\n\nOverview: {tut['concept']}")
+        sections.append(f"Concept: {tut['title']}\n\nDefinition: {tut['concept']}")
         
-        sw_text = ["How to do this in major editing software:\n"]
-        for sw_name, steps in tut["software"].items():
-            sw_text.append(f"{sw_name}:")
-            for s in steps:
-                sw_text.append(f"  {s}")
-            sw_text.append("")
+        sw_text = ["\nHow to perform in major editing software:\n"]
+        for sw_name, instruction in tut["software"].items():
+            sw_text.append(f"- {sw_name}: {instruction}")
         sections.append("\n".join(sw_text))
 
-        param_text = ["Technical Parameters:\n"]
-        for p in tut["parameters"]:
-            param_text.append(f"  - {p}")
-        sections.append("\n".join(param_text))
+        if "parameters" in tut:
+            param_text = ["Technical Parameters:\n"]
+            for p in tut["parameters"]:
+                param_text.append(f"- {p}")
+            sections.append("\n".join(param_text))
 
-        qz = tut["quiz"]
-        quiz_text = [
-            "Editor Knowledge Check:\n",
-            f"Question: {qz['question']}\n",
-            "\n".join([f"  {opt}" for opt in qz['options']]),
-            f"\nCorrect Answer: {qz['answer']}",
-            f"Explanation: {qz['explanation']}"
-        ]
-        sections.append("\n".join(quiz_text))
+        return "\n\n".join(sections)
 
-    else:
-        techs = knowledge_data.get("matched_techniques", []) if knowledge_data else []
-        fund = knowledge_data.get("matched_fundamentals", []) if knowledge_data else []
-        matched_styles = knowledge_data.get("matched_styles", []) if knowledge_data else []
+    # 3. Standard Knowledge Retrieval (Guaranteed UNIQUE Software Block Output)
+    techs = knowledge_data.get("matched_techniques", []) if knowledge_data else []
+    fund = knowledge_data.get("matched_fundamentals", []) if knowledge_data else []
+    matched_styles = knowledge_data.get("matched_styles", []) if knowledge_data else []
 
-        if techs:
-            for t in techs[:2]:
-                sec = [f"Concept: {t['name']}"]
-                sec.append(f"Category: {t.get('category', 'Technique')}")
-                sec.append(f"Definition: {t['definition']}")
-                sec.append(f"Use Case: {t['use_case']}")
-                sec.append(f"\nHow to perform in major editing software:")
-                sec.append("  - Premiere Pro: Select cut point and press Ctrl/Cmd + K to split clip")
-                sec.append("  - DaVinci Resolve: Trim Tool (T) or Blade Tool (B)")
-                sec.append("  - CapCut: Select clip, tap Split, then apply transition")
-                sec.append("  - Final Cut Pro: Blade (Cmd + B) or Ripple Trim (Option + [ or ])")
-                sec.append("  - Avid Media Composer: Add Edit (H) or Trim Roller (P)")
-                sec.append("  - VEGAS Pro: Press S to split clip at cursor and drag clip edges to crossfade")
-                sections.append("\n".join(sec))
-        elif fund:
-            for f in fund[:2]:
-                sections.append(f"Principle: {f['term']}\n\nOverview: {f['definition']}\nPacing Impact: {f['pacing_impact']}")
+    if techs:
+        for t in techs[:2]:
+            sec = [f"Concept: {t['name']}"]
+            sec.append(f"Category: {t.get('category', 'Technique')}")
+            sec.append(f"Definition: {t['definition']}")
+            sec.append(f"Use Case: {t.get('use_case', 'General Editing')}")
+            sections.append("\n".join(sec))
+    elif fund:
+        for f in fund[:2]:
+            sections.append(f"Concept: {f['term']}\n\nDefinition: {f['definition']}\nPacing Impact: {f['pacing_impact']}")
 
-        if matched_styles:
-            st_parts = ["Recommended Editing Styles:\n"]
-            for s in matched_styles[:2]:
-                st_parts.append(f"Style: {s['name']}\n  - Pacing: {s['pacing']}\n  - Sound Design: {s['sound_design']}\n  - Color Look: {s['color']}")
-            sections.append("\n\n".join(st_parts))
+    if matched_styles:
+        st_parts = ["Recommended Editing Styles:\n"]
+        for s in matched_styles[:2]:
+            st_parts.append(f"Style: {s['name']}\n  - Pacing: {s['pacing']}\n  - Sound Design: {s['sound_design']}\n  - Color Look: {s['color']}")
+        sections.append("\n\n".join(st_parts))
+
+    # Append Software Execution Block ONCE at the end
+    sections.append(
+        "\nHow to perform in major editing software:\n"
+        "- Premiere Pro: Select cut point and press Ctrl/Cmd + K to split clip\n"
+        "- DaVinci Resolve: Trim Tool (T) or Blade Tool (B)\n"
+        "- CapCut: Select clip, tap Split, then apply transition\n"
+        "- Final Cut Pro: Blade (Cmd + B) or Ripple Trim (Option + [ or ])\n"
+        "- Avid Media Composer: Add Edit (H) or Trim Roller (P)\n"
+        "- VEGAS Pro: Press S to split clip at cursor and drag clip edges to crossfade"
+    )
 
     if media_data and "status" not in media_data and "error" not in media_data:
         sections.append(f"OpenCV Media Inspection Report:\n"
@@ -205,15 +215,5 @@ def format_tutor_response(
                         f"  - Resolution: {media_data.get('resolution')}\n"
                         f"  - Shot Cuts Detected: {media_data.get('shot_count')}\n"
                         f"  - Assessment: {media_data.get('pacing_assessment')}")
-
-    if style_data:
-        sections.append(f"Style Recommendation:\n"
-                        f"  - Recommended Style: {style_data.get('recommended')}\n"
-                        f"  - Why it fits: {style_data.get('why')}")
-
-    if exercise_data:
-        sections.append(f"Practice Exercise:\n"
-                        f"  - Title: {exercise_data.get('title')}\n"
-                        f"  - Task: {exercise_data.get('description')}")
 
     return "\n\n".join(sections)

@@ -24,9 +24,9 @@
     {
       "name": "Velocity Editing / Speed Ramping",
       "category": "Visual Techniques",
-      "definition": "Dynamically changing playback speed within a single clip (e.g. fast-forwarding during movement, then slowing down to 100% or 24% at the point of action).",
+      "definition": "Dynamically changing playback speed within a single clip (e.g. fast-forwarding during movement, then slowing down to 100% or 25% at the point of action).",
       "use_case": "AMVs, montage edits, action sports, high-energy gaming or TikTok transitions.",
-      "example": "Dancer jumping: clip speeds up 3x during spin, ramps to slow-motion (50%) at peak landing, then snaps back to normal speed."
+      "example": "Dancer jumping: clip speeds up 3x during spin, ramps to slow-motion (25%) at peak landing, then snaps back to normal speed."
     },
     {
       "name": "Jump Cut",
@@ -48,6 +48,13 @@
       "definition": "An abrupt cut from an intense/loud scene to a tranquil/quiet scene (or vice versa).",
       "use_case": "Shock value, comedic timing, waking from a nightmare.",
       "example": "Cutting instantly from a roaring explosion to a peaceful alarm clock."
+    },
+    {
+      "name": "Invisible Cut",
+      "category": "Cutting Techniques",
+      "definition": "An edit masked within motion or darkness (e.g., passing behind a pillar, camera whip, dark room transition) to give the illusion of a single continuous shot.",
+      "use_case": "Onetake movie illusions (1917, Birdman), smooth music videos.",
+      "example": "Camera follows actor behind a solid dark tree trunk, cutting to a new take on the other side."
     },
     {
       "name": "Cutaway",
@@ -78,32 +85,18 @@
       "example": "Speaker mentions 'city traffic' and visual cuts to cars driving down Broadway."
     },
     {
-      "name": "Dialogue Editing",
+      "name": "Dialogue Editing & Audio Pre-laps",
       "category": "Sound Editing",
       "definition": "Cleaning, balancing, and pacing spoken audio tracks between actors or speakers.",
       "use_case": "Ensuring smooth audio levels, removing room noise, and timing pauses for natural cadence.",
       "example": "Using room tone fill to smooth out background noise between dialogue takes."
     },
     {
-      "name": "Ambient Sound & SFX",
-      "category": "Sound Editing",
-      "definition": "Background environmental audio (wind, room rumble) and sound effects (whooshes, risers, impacts).",
-      "use_case": "Immersion, emphasizing cuts with whoosh sounds, selling visual motion.",
-      "example": "Adding a subtle low-frequency riser sound before an action hit."
-    },
-    {
-      "name": "Color Correction & Grading",
+      "name": "Color Correction vs Color Grading",
       "category": "Color",
       "definition": "Color correction balances exposure, white balance, and contrast. Color grading applies artistic color stylization (e.g. Teal & Orange, film stock emulations).",
       "use_case": "Establishing mood, matching shots from different cameras, creating cinematic looks.",
       "example": "Lowering color temperature for cool night shots, raising warmth for nostalgic golden hour look."
-    },
-    {
-      "name": "Slow Motion & Freeze Frame",
-      "category": "Visual Techniques",
-      "definition": "Playing back footage recorded at high frame rates (60fps, 120fps) at 24fps or pausing on a single frame.",
-      "use_case": "Emphasizing dramatic moments, sporting achievements, or character introductions.",
-      "example": "Freezing a character frame with a title card overlay."
     }
   ]
 }

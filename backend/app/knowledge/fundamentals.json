@@ -1,6 +1,16 @@
 {
   "fundamentals": [
     {
+      "term": "Walter Murch Rule of Six",
+      "definition": "The golden hierarchy of editing priorities defined by legendary editor Walter Murch: 1) Emotion (51%), 2) Story (23%), 3) Rhythm (10%), 4) Eye-trace (7%), 5) 2D Plane of Screen (5%), 6) 3D Spatial Continuity (4%).",
+      "pacing_impact": "Never sacrifice emotion or story rhythm just to preserve spatial continuity."
+    },
+    {
+      "term": "Kuleshov Effect",
+      "definition": "A psychological film phenomenon where viewers derive more meaning from the interaction of two sequential shots than from a single shot in isolation (e.g. actor's neutral expression + bowl of soup = hunger; actor + coffin = grief).",
+      "pacing_impact": "Demonstrates that the context of a cut shapes viewer emotion more than the clip itself."
+    },
+    {
       "term": "Shot Duration",
       "definition": "The exact length of time a single continuous camera take remains on screen before cutting.",
       "pacing_impact": "Shorter durations (< 3s) create tension, energy, or confusion; longer durations (> 7s) establish calm, drama, or focus."
@@ -11,9 +21,14 @@
       "pacing_impact": "Good pacing matches visual cuts to sound accents, narrative intent, and emotional beats."
     },
     {
-      "term": "Continuity",
+      "term": "Continuity Editing",
       "definition": "Maintaining consistent spatial, temporal, and action relationships across cuts (e.g., 180-degree rule, eyeline matching, matching action).",
       "pacing_impact": "Prevents jarring viewer disorientation unless intentionally broken for stylistic effect."
+    },
+    {
+      "term": "Discontinuity Editing",
+      "definition": "Intentionally violating traditional continuity rules (jump cuts, spatial jumps) to shock, speed up time, or create psychological tension.",
+      "pacing_impact": "High-energy pattern interrupt that grabs viewer attention."
     },
     {
       "term": "Rhythm",
@@ -22,13 +37,18 @@
     },
     {
       "term": "Transitions",
-      "definition": "Techniques used to bridge the gap between two separate video clips or scenes.",
+      "definition": "Techniques used to bridge the gap between two separate video clips or scenes (Hard Cut, Dissolve, Wipe, Whip Pan, Fade).",
       "pacing_impact": "Dictates energy flow—hard cuts maintain momentum, fades signify passage of time, and whip pans create dynamic momentum."
     },
     {
-      "term": "Story Structure",
-      "definition": "The narrative organization of footage into setup, rising action, climax, and resolution.",
-      "pacing_impact": "Guides viewer attention and emotional investment."
+      "term": "Codecs & Editing Formats (ProRes vs H.264)",
+      "definition": "ProRes and DNxHR are intra-frame editing codecs (large files, light CPU load, smooth scrubbing). H.264/H.265 are inter-frame delivery codecs (compressed, heavy CPU load).",
+      "pacing_impact": "Editing in ProRes or using proxies ensures zero lag during timeline playback and precise cutting."
+    },
+    {
+      "term": "Frame Rates (24 FPS vs 30 FPS vs 60 FPS)",
+      "definition": "24 FPS is cinema standard (filmic motion blur). 30 FPS is TV broadcast standard. 60 FPS / 120 FPS provides high temporal resolution, required for 25% smooth slow-motion ramping.",
+      "pacing_impact": "Matching frame rates to intent preserves cinematic motion feel."
     }
   ]
 }
