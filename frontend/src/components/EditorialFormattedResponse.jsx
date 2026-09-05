@@ -44,10 +44,11 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
       });
     }
 
+    // Insert section breaks before keywords if missing
     const keywords = ['Concept:', 'Category:', 'Definition:', 'Use Case:', 'Why It Works:', 'Rationale:'];
     let currentMain = mainConcept;
     keywords.forEach(kw => {
-      if (currentMain.includes(kw)) {
+      if (currentMain.includes(kw) && !currentMain.includes(`**${kw}**`)) {
         currentMain = currentMain.replaceAll(kw, `\n\n**${kw}**`);
       }
     });
@@ -77,33 +78,43 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
     });
   };
 
+  // Render paragraphs and strip raw ** markdown syntax cleanly
+  const renderConceptParagraph = (paragraph, idx) => {
+    // If paragraph contains markdown bold like **Key:** Value
+    if (paragraph.includes('**')) {
+      const parts = paragraph.split(/(\*\*[^*]+\*\*)/g);
+      return (
+        <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] space-y-1.5 shadow-md">
+          <p className="text-slate-100 leading-relaxed font-sans text-base">
+            {parts.map((part, pIdx) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                const label = part.slice(2, -2).replace(':', '');
+                return (
+                  <span key={pIdx} className="font-bold text-amber-400 mr-2 block text-xs md:text-sm uppercase tracking-wider">
+                    {label}
+                  </span>
+                );
+              }
+              return <span key={pIdx}>{part}</span>;
+            })}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <p key={idx} className="text-slate-100 leading-relaxed text-base">
+        {paragraph}
+      </p>
+    );
+  };
+
   return (
     <div className="space-y-6 font-sans">
       
       {/* 1. MAIN EDITORIAL RATIONALE & CONCEPT */}
       <div className="space-y-4 leading-relaxed text-slate-100 text-base">
-        {conceptText.split('\n\n').map((paragraph, idx) => {
-          if (paragraph.startsWith('**') && paragraph.includes('**')) {
-            const colonIndex = paragraph.indexOf('**', 2);
-            const title = paragraph.substring(2, colonIndex).replace(':', '');
-            const body = paragraph.substring(colonIndex + 2).trim();
-
-            return (
-              <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] space-y-1.5 shadow-md">
-                <span className="text-xs md:text-sm font-bold text-amber-400 uppercase tracking-wider block font-sans">
-                  {title}
-                </span>
-                <p className="text-slate-100 leading-relaxed font-sans text-base">{body}</p>
-              </div>
-            );
-          }
-
-          return (
-            <p key={idx} className="text-slate-100 leading-relaxed text-base">
-              {paragraph}
-            </p>
-          );
-        })}
+        {conceptText.split('\n\n').map((paragraph, idx) => renderConceptParagraph(paragraph, idx))}
       </div>
 
       {/* 2. NLE EXECUTION CARDS */}
@@ -118,14 +129,13 @@ export default function EditorialFormattedResponse({ rawText, userSkill }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {softwareList.map((sw, idx) => (
-              <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] hover:border-amber-500/40 space-y-2.5 shadow-md transition-all">
-                <div className="flex items-center justify-between">
+              <div key={idx} className="bg-[#181a28] p-5 rounded-2xl border border-[#292c3e] hover:border-amber-500/40 space-y-2 shadow-md transition-all">
+                <div className="flex items-center justify-between border-b border-[#252838] pb-2">
                   <span className="text-base font-bold text-white font-sans">
                     {sw.name}
                   </span>
-                  <span className="text-xs font-mono text-amber-400 font-semibold">Step #{idx + 1}</span>
                 </div>
-                <p className="text-sm text-slate-200 leading-relaxed font-sans">
+                <p className="text-sm text-slate-200 leading-relaxed font-sans pt-1">
                   {renderFormattedInstruction(sw.instruction)}
                 </p>
               </div>
