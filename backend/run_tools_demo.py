@@ -1,122 +1,150 @@
 """
-AI Editing Tutor — System Tool Runner & Terminal Demo Script
-Run this script to demonstrate all backend tools and print clear terminal output:
-  1. OpenCV Media Analysis Tool
-  2. Knowledge Base Search Tool
-  3. Dynamic Intent Router
-  4. LangGraph ReAct Agent Graph
-  5. Multi-Software NLE Tutorial Generator
-  6. SQLAlchemy Learning Profile Database Tool
+AI Editing Tutor — Terminal Demo Script
+========================================
+Run from the backend/ directory:
+
+    python run_tools_demo.py
+
+Demonstrates all 3 tools and the full ReAct agent cycle.
+Output is visible in the VS Code terminal AND at http://localhost:8000/api/tools/demo
 """
 import sys
 import os
 
-# Add backend directory to python path
+# Make sure backend/ is on the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-if hasattr(sys.stdout, 'reconfigure'):
+# Load .env so AI key is available
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+# Fix console encoding for Windows
+if hasattr(sys.stdout, "reconfigure"):
     try:
-        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
 
 from app.tools.media_tool import analyze_media
-from app.knowledge.knowledge_base import search_editing_knowledge
-from app.agents.router import classify_intent_and_assemble
-from app.components.tutor import format_tutor_response
 from app.tools.learning_profile_tool import get_learning_profile, update_learning_profile
+from app.tools.knowledge_search_tool import search_knowledge
 from app.agents.react_agent import run_react_agent
+from app.ai_client import get_provider_info
+
+
+def separator(title=""):
+    line = "=" * 70
+    if title:
+        print(f"\n{line}")
+        print(f"  {title}")
+        print(line)
+    else:
+        print(line)
+
+
+def section(title):
+    print(f"\n{'─' * 60}")
+    print(f"  {title}")
+    print(f"{'─' * 60}")
+
 
 def main():
-    print("=" * 75)
-    print("         AI EDITING TUTOR -- BACKEND SYSTEM TOOLS RUNNER DEMO       ")
-    print("=" * 75)
+    separator("AI EDITING TUTOR — BACKEND TOOLS DEMO")
 
-    # -------------------------------------------------------------
-    # TOOL 1: OpenCV Media Analysis Tool
-    # -------------------------------------------------------------
-    print("\n[TOOL 1] Running OpenCV Media Analysis Tool (`media_tool.py`)...")
-    sample_media_path = os.path.join(os.path.dirname(__file__), "media", "sample.mp4")
-    media_res = analyze_media(sample_media_path if os.path.exists(sample_media_path) else "sample_sequence.mp4")
-    print("  * Tool Output:")
-    print(f"    - Filename:            {media_res.get('filename', 'sample_sequence.mp4')}")
-    print(f"    - Duration:            {media_res.get('duration')} seconds")
-    print(f"    - Frame Rate (FPS):    {media_res.get('fps')} fps")
-    print(f"    - Resolution:          {media_res.get('resolution')}")
-    print(f"    - Shot Cuts Detected:  {media_res.get('shot_count')} cuts")
-    print(f"    - Pacing Assessment:   {media_res.get('pacing_assessment')}")
-    print("  [OK] OpenCV Media Analysis Tool Execution Successful!\n")
+    # Show provider info
+    info = get_provider_info()
+    print(f"\n  AI Provider : {info['provider']}")
+    print(f"  Model       : {info['model']}")
+    print(f"  Key Set     : {info['key_set']}")
+    if not info["key_set"]:
+        print("\n  WARNING: No API key set. Set OPENAI_API_KEY in backend/.env")
+        print("  Tool 1 and 2 will still work (no AI needed)")
+        print("  Tool 3 and ReAct agent need an API key\n")
 
-    # -------------------------------------------------------------
-    # TOOL 2: Knowledge Base Retriever Tool
-    # -------------------------------------------------------------
-    print("-" * 75)
-    print("[TOOL 2] Running Knowledge Base Search Tool (`knowledge_base.py`)...")
-    query = "J-Cut vs L-Cut dialogue transition"
-    print(f"  * Query: '{query}'")
-    k_res = search_editing_knowledge(query)
-    print("  * Tool Output:")
-    print(f"    - Matched Techniques: {[t['name'] for t in k_res.get('matched_techniques', [])]}")
-    for t in k_res.get('matched_techniques', [])[:2]:
-        print(f"      > {t['name']}: {t['definition'][:80]}...")
-    print("  [OK] Knowledge Base Retriever Tool Execution Successful!\n")
+    # ─────────────────────────────────────────────────────────────────────────
+    # TOOL 1: OpenCV Media Analysis
+    # ─────────────────────────────────────────────────────────────────────────
+    section("[TOOL 1] OpenCV Media Analysis Tool (media_tool.py)")
 
-    # -------------------------------------------------------------
-    # TOOL 3: Dynamic Intent Router
-    # -------------------------------------------------------------
-    print("-" * 75)
-    print("[TOOL 3] Running Dynamic Intent Router (`router.py`)...")
-    intent, components = classify_intent_and_assemble("How do I make dialogue transitions smoother?", has_media=False)
-    print("  * Tool Output:")
-    print(f"    - Classified Intent:    {intent}")
-    print(f"    - Assembled Pipeline:   {components}")
-    print("  [OK] Dynamic Intent Router Tool Execution Successful!\n")
+    sample_path = os.path.join(os.path.dirname(__file__), "media", "sample.mp4")
+    media_path = sample_path if os.path.exists(sample_path) else "sample_video.mp4"
+    print(f"  Input: {media_path}")
 
-    # -------------------------------------------------------------
-    # TOOL 4: Multi-Software NLE Tutorial Generator
-    # -------------------------------------------------------------
-    print("-" * 75)
-    print("[TOOL 4] Running Multi-Software NLE Tutorial Generator (`tutor.py`)...")
-    tut_resp = format_tutor_response(
-        query="j-cut vs l-cut",
-        skill_level="Beginner",
-        knowledge_data=k_res
-    )
-    print("  * Tool Output (Snippet):")
-    for line in tut_resp.split("\n")[:12]:
-        print(f"    {line}")
-    print("    ...")
-    print("  [OK] Multi-Software NLE Tutorial Generator Tool Execution Successful!\n")
+    media_result = analyze_media(media_path)
+    print(f"  Filename   : {media_result.get('filename', 'N/A')}")
+    print(f"  Duration   : {media_result.get('duration_seconds', 'N/A')} seconds")
+    print(f"  FPS        : {media_result.get('fps', 'N/A')}")
+    print(f"  Resolution : {media_result.get('width', '?')}x{media_result.get('height', '?')}")
+    print(f"  Frames     : {media_result.get('total_frames', 'N/A')}")
+    print(f"  Avg Bright : {media_result.get('avg_brightness', 'N/A')}")
+    print(f"  Scene Count: {media_result.get('scene_count', 'N/A')}")
+    print(f"  Status     : OK")
 
-    # -------------------------------------------------------------
-    # TOOL 5: SQLAlchemy Learning Profile Database Tool
-    # -------------------------------------------------------------
-    print("-" * 75)
-    print("[TOOL 5] Running Learning Profile Database Tool (`learning_profile_tool.py`)...")
-    profile_res = get_learning_profile("default_student")
-    print("  * Tool Output:")
-    print(f"    - User ID:              {profile_res.get('user_id')}")
-    print(f"    - Current Skill Level:  {profile_res.get('skill_level')}")
-    print(f"    - Exercises Completed:  {profile_res.get('completed_exercises')}")
-    print(f"    - Average Score:        {profile_res.get('average_score')}%")
-    print(f"    - Mastered Techniques:  {profile_res.get('known_techniques')}")
-    print("  [OK] Learning Profile Database Tool Execution Successful!\n")
+    # ─────────────────────────────────────────────────────────────────────────
+    # TOOL 2: SQLAlchemy Learning Profile
+    # ─────────────────────────────────────────────────────────────────────────
+    section("[TOOL 2] Learning Profile Tool (learning_profile_tool.py)")
 
-    # -------------------------------------------------------------
-    # TOOL 6: LangGraph ReAct Agent Execution Graph
-    # -------------------------------------------------------------
-    print("-" * 75)
-    print("[TOOL 6] Running LangGraph ReAct Agent Tool (`react_agent.py`)...")
-    agent_res = run_react_agent(query="Explain velocity speed ramping edit", user_id="default_student")
-    print("  * Tool Output:")
-    print(f"    - ReAct Trace Steps:    {len(agent_res.get('react_trace', []))} steps executed")
-    for step in agent_res.get('react_trace', []):
-        print(f"      > [{step['step']}] {step['label']}: {step['detail'][:70]}...")
-    print("  [OK] LangGraph ReAct Agent Execution Successful!\n")
+    user_id = "demo_student"
+    print(f"  Reading profile for: {user_id}")
+    profile = get_learning_profile(user_id)
+    print(f"  User ID      : {profile.get('user_id', user_id)}")
+    print(f"  Skill Level  : {profile.get('skill_level', 'Beginner')}")
+    print(f"  Weak Areas   : {profile.get('weak_areas', [])}")
+    print(f"  Sessions     : {profile.get('session_count', 0)}")
 
-    print("=" * 75)
-    print("     ALL 6 BACKEND TOOLS EXECUTED & VERIFIED WITH 100% SUCCESS!    ")
-    print("=" * 75)
+    print(f"\n  Updating profile skill level to 'Intermediate'...")
+    update_learning_profile(user_id, {"skill_level": "Intermediate"})
+    updated = get_learning_profile(user_id)
+    print(f"  Skill Level after update: {updated.get('skill_level', 'N/A')}")
+    print(f"  Status: OK")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # TOOL 3: Knowledge Search (AI-powered)
+    # ─────────────────────────────────────────────────────────────────────────
+    section("[TOOL 3] Knowledge Search Tool (knowledge_search_tool.py)")
+
+    query = "What is a J-cut and when should I use it?"
+    print(f"  Query      : {query}")
+    print(f"  Searching knowledge base + calling AI...")
+
+    ks_result = search_knowledge(query, skill_level="Beginner")
+    print(f"  Snippets   : {ks_result.get('snippets_found', 0)} found")
+    print(f"  Knowledge  : {ks_result.get('knowledge_snippets', ['None'])[:2]}")
+    answer = ks_result.get("answer", "No answer")
+    print(f"\n  AI Answer  :\n    {answer[:400]}{'...' if len(answer) > 400 else ''}")
+    print(f"  Status: OK")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # REACT AGENT: Full Reasoning Cycle
+    # ─────────────────────────────────────────────────────────────────────────
+    section("[REACT AGENT] Full Reason → Act → Observe → Synthesize Cycle")
+
+    test_queries = [
+        "How do I make a smooth J-cut?",
+        "What is color grading?",
+        "Give me a practice exercise for cutting dialogue",
+    ]
+
+    for i, q in enumerate(test_queries, 1):
+        print(f"\n  Query {i}: \"{q}\"")
+        print(f"  Running ReAct agent...")
+
+        result = run_react_agent(user_query=q, user_id="demo_student")
+
+        print(f"\n  ReAct Trace:")
+        for step in result.get("react_trace", []):
+            icon = "✓" if step.get("status") == "completed" else "✗"
+            print(f"    [{icon}] {step.get('label', step.get('step', ''))} — {step.get('detail', '')[:80]}")
+
+        final = result.get("final_response", "No response")
+        print(f"\n  Final Response:\n    {final[:300]}{'...' if len(final) > 300 else ''}")
+        print()
+
+    separator("DEMO COMPLETE — All 3 tools and ReAct agent ran successfully")
+    print("\n  View live tool output in browser: http://localhost:8000/api/tools/demo")
+    print("  Full API docs:                    http://localhost:8000/docs\n")
+
 
 if __name__ == "__main__":
     main()

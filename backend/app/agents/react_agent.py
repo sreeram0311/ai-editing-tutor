@@ -1,256 +1,381 @@
 """
-LangGraph ReAct Agent Implementation.
-Implements explicit Reason -> Act -> Observe -> Repeat execution loop with state tracking,
-dynamic component assembly, tool integration, and safe high-level activity trace generation.
+LangGraph ReAct Agent — Complete Implementation.
+Explicit Reason → Act → Observe → Repeat loop with visible trace.
+Handles ALL question types (editing-specific and general).
+Uses provider-agnostic AI client (Gemini / Groq / OpenAI).
 """
-from typing import Dict, Any, List
-import json
-
+from typing import Dict, Any
 from langgraph.graph import StateGraph, END
+
 from app.agents.state import AgentState
 from app.agents.router import classify_intent_and_assemble
 from app.tools.media_tool import analyze_media
 from app.tools.learning_profile_tool import get_learning_profile, update_learning_profile
+from app.tools.knowledge_search_tool import search_knowledge
 from app.knowledge.knowledge_base import search_editing_knowledge
-from app.components.tutor import format_tutor_response
-from app.components.style_analyzer import recommend_editing_style
-from app.components.exercise_generator import generate_personalized_exercise
+from app.ai_client import get_llm
+from langchain_core.messages import HumanMessage, SystemMessage
+
+MAX_ITERATIONS = 3
+
+
+# ── Node 1: Router ───────────────────────────────────────────────────────────
 
 def router_node(state: AgentState) -> Dict[str, Any]:
-    """
-    Step 1: Router Node - Classifies query intent and dynamically assembles components.
-    """
+    """REASON Step 1 — Classifies intent and dynamically assembles components."""
     user_query = state.get("user_query", "")
     has_media = bool(state.get("uploaded_media"))
-    
+
     intent, components = classify_intent_and_assemble(user_query, has_media=has_media)
-    
+
     trace_entry = {
         "step": "router",
-        "label": "Understanding question & assembling components",
-        "detail": f"Detected Intent: {intent} | Assembled: {', '.join(components)}",
+        "label": "🔍 Understanding question & assembling components",
+        "detail": f"Intent: {intent} | Components: {', '.join(components)}",
         "status": "completed"
     }
-    
+
     react_trace = list(state.get("react_trace", []))
     react_trace.append(trace_entry)
-    
+
     return {
         "detected_intent": intent,
         "selected_components": components,
         "react_trace": react_trace,
-        "iteration_count": 0
+        "iteration_count": 0,
+        "tool_results": [],
     }
 
+
+# ── Node 2: Reason ────────────────────────────────────────────────────────────
+
 def reason_node(state: AgentState) -> Dict[str, Any]:
-    """
-    Step 2: Reason Node - Evaluates current state and decides the next action or tool call.
-    """
-    query = state.get("user_query", "")
-    intent = state.get("detected_intent", "GENERAL_EDITING")
+    """REASON Step 2 — Decides which tool to call next (or to synthesize)."""
+    intent = state.get("detected_intent", "GENERAL")
     media = state.get("uploaded_media")
-    profile = state.get("user_profile")
     tool_results = state.get("tool_results", [])
     iteration_count = state.get("iteration_count", 0) + 1
-    
-    executed_tools = [tr.get("tool") for tr in tool_results]
-    next_action = None
-    pending_tool = None
-    
-    # ReAct Decision Logic: Determine tool or synthesis step
-    if (intent in ["MEDIA_ANALYSIS", "STYLE_RECOMMENDATION", "FEEDBACK", "MULTI_STEP_REACT", "TROUBLESHOOTING"] or media) and "analyze_media" not in executed_tools:
-        next_action = "call_tool"
-        pending_tool = {"name": "analyze_media", "args": {"media_path": media.get("filepath") if media else "sample_video.mp4"}}
-    elif (intent in ["EXERCISE", "MULTI_STEP_REACT", "FEEDBACK", "GENERAL_EDITING"] or "weakness" in query.lower()) and "get_learning_profile" not in executed_tools:
-        next_action = "call_tool"
-        pending_tool = {"name": "get_learning_profile", "args": {"user_id": state.get("user_id", "default_student")}}
-    elif intent == "KNOWLEDGE" and "search_editing_knowledge" not in executed_tools:
-        next_action = "call_tool"
-        pending_tool = {"name": "search_editing_knowledge", "args": {"query": query}}
-    else:
-        next_action = "synthesize_final_answer"
+    executed_tools = {tr.get("tool") for tr in tool_results}
 
-    reasoning_steps = list(state.get("reasoning_steps", []))
-    reason_msg = f"Iteration {iteration_count}: Decided to {pending_tool['name'] if pending_tool else 'synthesize final response'} based on intent '{intent}'."
-    reasoning_steps.append(reason_msg)
-    
-    react_trace = list(state.get("react_trace", []))
-    trace_label = f"Evaluating action: {pending_tool['name']}" if pending_tool else "Generating personalized response"
-    react_trace.append({
-        "step": f"reason_{iteration_count}",
-        "label": trace_label,
-        "detail": reason_msg,
+    next_action = "synthesize"
+    pending_tool = None
+
+    # Decide tool sequence based on intent
+    needs_media = intent in ("MEDIA_ANALYSIS", "STYLE_RECOMMENDATION", "FEEDBACK",
+                             "MULTI_STEP_REACT", "TROUBLESHOOTING")
+    needs_profile = intent in ("EXERCISE", "MULTI_STEP_REACT", "FEEDBACK")
+    needs_knowledge = intent in ("KNOWLEDGE", "GENERAL", "GENERAL_EDITING",
+                                  "TROUBLESHOOTING")
+
+    if needs_media and media and "analyze_media" not in executed_tools:
+        next_action = "call_tool"
+        pending_tool = {
+            "name": "analyze_media",
+            "args": {"media_path": media.get("filepath", "sample_video.mp4")}
+        }
+    elif needs_profile and "get_learning_profile" not in executed_tools:
+        user_id = state.get("user_id", "default_student")
+        next_action = "call_tool"
+        pending_tool = {"name": "get_learning_profile", "args": {"user_id": user_id}}
+    elif needs_knowledge and "search_knowledge" not in executed_tools:
+        profile = state.get("user_profile", {})
+        skill = profile.get("skill_level", "Beginner") if profile else "Beginner"
+        next_action = "call_tool"
+        pending_tool = {
+            "name": "search_knowledge",
+            "args": {"query": state.get("user_query", ""), "skill_level": skill}
+        }
+    elif not tool_results and "search_knowledge" not in executed_tools:
+        # Always search knowledge for questions with no tool results yet
+        next_action = "call_tool"
+        pending_tool = {
+            "name": "search_knowledge",
+            "args": {"query": state.get("user_query", ""), "skill_level": "Beginner"}
+        }
+
+    if iteration_count >= MAX_ITERATIONS:
+        next_action = "synthesize"
+
+    trace_entry = {
+        "step": "reason",
+        "label": "🧠 Reasoning — deciding next action",
+        "detail": (
+            f"Iteration {iteration_count} | "
+            f"Next: {pending_tool['name'] if pending_tool else 'synthesize final response'}"
+        ),
         "status": "completed"
-    })
-    
+    }
+
+    react_trace = list(state.get("react_trace", []))
+    react_trace.append(trace_entry)
+
     return {
         "next_action": next_action,
         "pending_tool": pending_tool,
-        "reasoning_steps": reasoning_steps,
+        "iteration_count": iteration_count,
         "react_trace": react_trace,
-        "iteration_count": iteration_count
     }
+
+
+# ── Node 3: Action ────────────────────────────────────────────────────────────
 
 def action_node(state: AgentState) -> Dict[str, Any]:
-    """
-    Step 3: Action Node - Executes real tools (Media Analyzer, Learning Profile, Knowledge Base).
-    """
-    pending = state.get("pending_tool")
-    if not pending:
-        return {}
+    """ACT — Executes the chosen tool and records the observation."""
+    pending_tool = state.get("pending_tool", {})
+    tool_name = pending_tool.get("name", "")
+    tool_args = pending_tool.get("args", {})
 
-    tool_name = pending.get("name")
-    args = pending.get("args", {})
-    
     result = {}
-    if tool_name == "analyze_media":
-        path = args.get("media_path", "video.mp4")
-        result = analyze_media(path)
-    elif tool_name == "get_learning_profile":
-        uid = args.get("user_id", "default_student")
-        result = get_learning_profile(uid)
-    elif tool_name == "search_editing_knowledge":
-        q = args.get("query", "")
-        result = search_editing_knowledge(q)
+    error = None
+
+    try:
+        if tool_name == "analyze_media":
+            result = analyze_media(tool_args.get("media_path", ""))
+        elif tool_name == "get_learning_profile":
+            result = get_learning_profile(tool_args.get("user_id", "default_student"))
+        elif tool_name == "update_learning_profile":
+            result = update_learning_profile(
+                tool_args.get("user_id", "default_student"),
+                tool_args.get("updates", {})
+            )
+        elif tool_name == "search_knowledge":
+            result = search_knowledge(
+                tool_args.get("query", ""),
+                tool_args.get("skill_level", "Beginner")
+            )
+        else:
+            result = {"error": f"Unknown tool: {tool_name}"}
+    except Exception as e:
+        error = str(e)
+        result = {"tool": tool_name, "error": error}
+
+    tool_result = {"tool": tool_name, "args": tool_args, "result": result}
+
+    trace_entry = {
+        "step": "action",
+        "label": f"⚡ Acting — running tool: {tool_name}",
+        "detail": (
+            f"Tool: {tool_name} | "
+            + (f"Error: {error}" if error else f"Result keys: {list(result.keys())}")
+        ),
+        "status": "error" if error else "completed"
+    }
+
+    react_trace = list(state.get("react_trace", []))
+    react_trace.append(trace_entry)
 
     tool_results = list(state.get("tool_results", []))
-    tool_results.append({"tool": tool_name, "args": args, "output": result})
-    
-    observations = list(state.get("observations", []))
-    obs_summary = f"Observed result from {tool_name} tool."
-    observations.append(obs_summary)
-    
-    react_trace = list(state.get("react_trace", []))
-    react_trace.append({
-        "step": f"action_{tool_name}",
-        "label": f"Executed tool: {tool_name}",
-        "detail": f"Successfully retrieved output from {tool_name}",
-        "status": "completed"
-    })
+    tool_results.append(tool_result)
 
-    updates = {
-        "tool_results": tool_results,
-        "observations": observations,
-        "react_trace": react_trace,
-        "pending_tool": None
-    }
+    # Cache profile if we just loaded it
+    updated = {}
     if tool_name == "get_learning_profile":
-        updates["user_profile"] = result
-
-    return updates
-
-def observe_node(state: AgentState) -> Dict[str, Any]:
-    """
-    Step 4: Observe Node - Evaluates tool observation results into state.
-    """
-    return {}
-
-def final_synthesis_node(state: AgentState) -> Dict[str, Any]:
-    """
-    Step 5: Final Synthesis Node - Synthesizes tailored response adapted to user skill level.
-    """
-    query = state.get("user_query", "")
-    profile = state.get("user_profile") or get_learning_profile(state.get("user_id", "default_student"))
-    tool_results = state.get("tool_results", [])
-    intent = state.get("detected_intent", "GENERAL_EDITING")
-
-    # Extract tool outputs
-    media_data = next((tr["output"] for tr in tool_results if tr["tool"] == "analyze_media"), None)
-    knowledge_data = next((tr["output"] for tr in tool_results if tr["tool"] == "search_editing_knowledge"), None)
-    
-    if not knowledge_data:
-        knowledge_data = search_editing_knowledge(query)
-
-    style_data = None
-    if intent in ["STYLE_RECOMMENDATION", "MEDIA_ANALYSIS"] or "style" in query.lower():
-        metrics = media_data or {"duration": 60.0, "average_shot_duration": 6.5}
-        style_data = recommend_editing_style(metrics, query)
-
-    exercise_data = None
-    if intent in ["EXERCISE", "MULTI_STEP_REACT"]:
-        exercise_data = generate_personalized_exercise(profile)
-
-    skill_level = profile.get("skill_level", "Beginner")
-    final_ans = format_tutor_response(
-        query=query,
-        skill_level=skill_level,
-        knowledge_data=knowledge_data,
-        media_data=media_data,
-        style_data=style_data,
-        exercise_data=exercise_data
-    )
-
-    react_trace = list(state.get("react_trace", []))
-    react_trace.append({
-        "step": "final_answer",
-        "label": "Final response synthesized",
-        "detail": f"Generated response tailored to {skill_level} level.",
-        "status": "completed"
-    })
+        updated["user_profile"] = result
 
     return {
-        "final_answer": final_ans,
-        "is_complete": True,
-        "react_trace": react_trace
+        "tool_results": tool_results,
+        "react_trace": react_trace,
+        "pending_tool": None,
+        **updated,
     }
 
-def decide_next_step(state: AgentState) -> str:
-    """
-    Conditional Edge Decider.
-    """
-    next_action = state.get("next_action")
-    if next_action == "call_tool":
-        return "action_node"
-    return "final_synthesis_node"
 
-# Build LangGraph Workflow Graph
-builder = StateGraph(AgentState)
+# ── Node 4: Observe ───────────────────────────────────────────────────────────
 
-builder.add_node("router", router_node)
-builder.add_node("reason", reason_node)
-builder.add_node("action", action_node)
-builder.add_node("observe", observe_node)
-builder.add_node("final_synthesis", final_synthesis_node)
+def observe_node(state: AgentState) -> Dict[str, Any]:
+    """OBSERVE — Evaluates tool output and decides whether to loop or synthesize."""
+    tool_results = state.get("tool_results", [])
+    last = tool_results[-1] if tool_results else {}
+    last_result = last.get("result", {})
+    iteration_count = state.get("iteration_count", 0)
 
-builder.set_entry_point("router")
-builder.add_edge("router", "reason")
+    has_error = "error" in last_result
+    observation = "Tool executed successfully." if not has_error else f"Tool error: {last_result.get('error')}"
 
-builder.add_conditional_edges(
-    "reason",
-    decide_next_step,
-    {
-        "action_node": "action",
-        "final_synthesis_node": "final_synthesis"
+    # Decide: continue looping or synthesize
+    if iteration_count >= MAX_ITERATIONS:
+        next_action = "synthesize"
+        observation += " Max iterations reached — synthesizing final response."
+    else:
+        next_action = "reason"  # Loop back to reason for more tools
+
+    trace_entry = {
+        "step": "observe",
+        "label": "👁 Observing tool result",
+        "detail": observation,
+        "status": "completed"
     }
-)
 
-builder.add_edge("action", "observe")
-builder.add_edge("observe", "reason")
-builder.add_edge("final_synthesis", END)
+    react_trace = list(state.get("react_trace", []))
+    react_trace.append(trace_entry)
 
-react_agent = builder.compile()
+    return {
+        "next_action": next_action,
+        "react_trace": react_trace,
+    }
 
-def run_react_agent(query: str, user_id: str = "default_student", media_info: Dict[str, Any] = None) -> Dict[str, Any]:
+
+# ── Node 5: Synthesis ─────────────────────────────────────────────────────────
+
+def synthesis_node(state: AgentState) -> Dict[str, Any]:
+    """SYNTHESIZE — Uses AI to compose the final response from all tool observations."""
+    query = state.get("user_query", "")
+    intent = state.get("detected_intent", "GENERAL")
+    tool_results = state.get("tool_results", [])
+    profile = state.get("user_profile", {})
+    skill_level = profile.get("skill_level", "Beginner") if profile else "Beginner"
+
+    # If knowledge search already produced an answer, use it directly
+    for tr in tool_results:
+        if tr.get("tool") == "search_knowledge":
+            answer = tr.get("result", {}).get("answer", "")
+            if answer:
+                trace_entry = {
+                    "step": "synthesize",
+                    "label": "✅ Synthesizing final response",
+                    "detail": f"Using knowledge search answer ({len(answer)} chars)",
+                    "status": "completed"
+                }
+                react_trace = list(state.get("react_trace", []))
+                react_trace.append(trace_entry)
+                return {"final_response": answer, "react_trace": react_trace}
+
+    # Otherwise use AI to synthesize from all tool observations
+    observations = []
+    for tr in tool_results:
+        tool_name = tr.get("tool", "")
+        result = tr.get("result", {})
+        if tool_name == "analyze_media":
+            observations.append(
+                f"Media Analysis: {result.get('filename', 'video')} — "
+                f"Duration: {result.get('duration_seconds', '?')}s, "
+                f"FPS: {result.get('fps', '?')}, "
+                f"Resolution: {result.get('width', '?')}x{result.get('height', '?')}, "
+                f"Scenes: {result.get('scene_count', '?')}"
+            )
+        elif tool_name == "get_learning_profile":
+            observations.append(
+                f"Student Profile: Skill={result.get('skill_level', 'Beginner')}, "
+                f"Weak areas={result.get('weak_areas', [])}"
+            )
+        elif "error" not in result:
+            observations.append(f"{tool_name}: {str(result)[:200]}")
+
+    obs_text = "\n".join(observations) if observations else "No tool data available."
+
+    system_prompt = (
+        f"You are an expert video/audio/image editing tutor. "
+        f"The student is at {skill_level} level. "
+        "Give a clear, helpful, structured response to their question. "
+        "Base your answer on the observations from the tools. "
+        "If no tool data is available, answer from your own knowledge."
+    )
+    user_prompt = (
+        f"Student question: {query}\n\n"
+        f"Tool observations:\n{obs_text}\n\n"
+        "Provide a thorough, helpful response."
+    )
+
+    try:
+        llm = get_llm(temperature=0.7)
+        response = llm.invoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt),
+        ])
+        final_response = response.content
+    except Exception as e:
+        final_response = f"Error generating response: {e}\n\nTool observations:\n{obs_text}"
+
+    trace_entry = {
+        "step": "synthesize",
+        "label": "✅ Synthesizing final response",
+        "detail": f"AI synthesized response ({len(final_response)} chars) from {len(tool_results)} tool(s)",
+        "status": "completed"
+    }
+
+    react_trace = list(state.get("react_trace", []))
+    react_trace.append(trace_entry)
+
+    return {"final_response": final_response, "react_trace": react_trace}
+
+
+# ── Routing logic ─────────────────────────────────────────────────────────────
+
+def should_act_or_synthesize(state: AgentState) -> str:
+    """Edge function: routes from reason_node to action or synthesis."""
+    return "action" if state.get("next_action") == "call_tool" else "synthesize"
+
+
+def should_loop_or_synthesize(state: AgentState) -> str:
+    """Edge function: routes from observe_node back to reason or to synthesis."""
+    return "reason" if state.get("next_action") == "reason" else "synthesize"
+
+
+# ── Build the graph ───────────────────────────────────────────────────────────
+
+def build_graph() -> StateGraph:
+    graph = StateGraph(AgentState)
+
+    graph.add_node("router",    router_node)
+    graph.add_node("reason",    reason_node)
+    graph.add_node("action",    action_node)
+    graph.add_node("observe",   observe_node)
+    graph.add_node("synthesize", synthesis_node)
+
+    graph.set_entry_point("router")
+    graph.add_edge("router", "reason")
+    graph.add_conditional_edges("reason", should_act_or_synthesize, {
+        "action":    "action",
+        "synthesize": "synthesize",
+    })
+    graph.add_edge("action", "observe")
+    graph.add_conditional_edges("observe", should_loop_or_synthesize, {
+        "reason":    "reason",
+        "synthesize": "synthesize",
+    })
+    graph.add_edge("synthesize", END)
+
+    return graph.compile()
+
+
+_compiled_graph = None
+
+
+def run_react_agent(
+    user_query: str,
+    user_id: str = "default_student",
+    uploaded_media: dict = None,
+) -> Dict[str, Any]:
     """
-    Executes the LangGraph ReAct workflow and returns the final state including react_trace.
+    Entry point for the ReAct agent.
+    Returns final_response, react_trace, detected_intent, selected_components.
     """
+    global _compiled_graph
+    if _compiled_graph is None:
+        _compiled_graph = build_graph()
+
     initial_state: AgentState = {
-        "user_query": query,
-        "uploaded_media": media_info,
-        "user_profile": None,
+        "user_query": user_query,
         "user_id": user_id,
+        "uploaded_media": uploaded_media,
+        "user_profile": None,
         "detected_intent": None,
         "selected_components": [],
-        "tool_results": [],
-        "reasoning_steps": [],
-        "observations": [],
-        "final_answer": None,
-        "react_trace": [],
-        "next_action": None,
         "pending_tool": None,
+        "tool_results": [],
+        "react_trace": [],
         "iteration_count": 0,
-        "is_complete": False
+        "next_action": None,
+        "final_response": None,
+        "exercise": None,
     }
 
-    final_state = react_agent.invoke(initial_state)
-    return final_state
+    final_state = _compiled_graph.invoke(initial_state)
+
+    return {
+        "final_response": final_state.get("final_response", "No response generated."),
+        "react_trace": final_state.get("react_trace", []),
+        "detected_intent": final_state.get("detected_intent"),
+        "selected_components": final_state.get("selected_components", []),
+        "tool_results": final_state.get("tool_results", []),
+    }

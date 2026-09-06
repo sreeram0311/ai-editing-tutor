@@ -23,10 +23,17 @@ export default function App() {
   const [detectedIntent, setDetectedIntent] = useState(null);
   const [currentExercise, setCurrentExercise] = useState(null);
 
-  const handleSendMessage = async (queryText) => {
+  const handleSendMessage = async (queryText, mediaInfo = null) => {
+    if (!queryText || !queryText.trim()) return;
+
     const userMsg = { sender: 'user', text: queryText };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
+
+    // Clear previous trace while loading
+    setReactTrace([]);
+    setSelectedComponents([]);
+    setDetectedIntent(null);
 
     try {
       const res = await fetch('/api/chat', {
@@ -35,122 +42,118 @@ export default function App() {
         body: JSON.stringify({
           query: queryText,
           user_id: 'default_student',
-          media_info: currentMedia,
+          media_info: mediaInfo || currentMedia || null,
         }),
       });
 
-      if (!res.ok) throw new Error('Chat API response failed');
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Server error ${res.status}: ${errText}`);
+      }
 
       const data = await res.json();
-      setReactTrace(data.react_trace || []);
-      setSelectedComponents(data.selected_components || []);
-      setDetectedIntent(data.detected_intent || null);
 
-      const tutorMsg = { sender: 'tutor', text: data.final_answer };
-      setMessages((prev) => [...prev, tutorMsg]);
-
-      if (data.detected_intent === 'EXERCISE' || data.detected_intent === 'MULTI_STEP_REACT') {
-        fetchExercise();
+      // Update ReAct trace panel
+      if (data.react_trace && data.react_trace.length > 0) {
+        setReactTrace(data.react_trace);
+        setIsDiagnosticsOpen(true); // Auto-open trace panel on response
       }
+
+      if (data.selected_components) setSelectedComponents(data.selected_components);
+      if (data.detected_intent) setDetectedIntent(data.detected_intent);
+
+      // Add AI reply to chat
+      const aiMsg = {
+        sender: 'ai',
+        text: data.response || 'No response received.',
+        intent: data.detected_intent,
+        components: data.selected_components,
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+
     } catch (err) {
+      console.error('Chat error:', err);
       setMessages((prev) => [
         ...prev,
-        { sender: 'tutor', text: `Unable to complete request: ${err.message}` },
+        {
+          sender: 'ai',
+          text: `Error: ${err.message}. Make sure the backend is running on port 8000.`,
+          isError: true,
+        },
       ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchExercise = async () => {
-    try {
-      const res = await fetch('/api/exercises/default_student');
-      if (res.ok) {
-        const ex = await res.json();
-        setCurrentExercise(ex);
-      }
-    } catch (err) {
-      console.error('Failed to fetch exercise:', err);
+  const handleMediaAnalyzed = (mediaData) => {
+    setCurrentMedia(mediaData);
+  };
+
+  const renderActiveView = () => {
+    const commonProps = {
+      messages,
+      loading,
+      onSendMessage: handleSendMessage,
+      currentMedia,
+      onMediaAnalyzed: handleMediaAnalyzed,
+      detectedIntent,
+      selectedComponents,
+      userSkill,
+      currentExercise,
+      setCurrentExercise,
+    };
+
+    switch (activeView) {
+      case 'tutor':
+        return <EditorialTutorWorkspace {...commonProps} />;
+      case 'media':
+        return <MediaAnalysisWorkstation {...commonProps} />;
+      case 'practice':
+        return <PracticeDrillsWorkstation {...commonProps} />;
+      case 'profile':
+        return <EditorialProfileWorkstation {...commonProps} userSkill={userSkill} setUserSkill={setUserSkill} />;
+      case 'timeline':
+        return <MasterTimelineWorkstation {...commonProps} />;
+      default:
+        return <EditorialTutorWorkspace {...commonProps} />;
     }
   };
 
   return (
-    <div className="h-screen w-screen bg-cinema-950 text-cinema-100 flex flex-col overflow-hidden select-none font-sans">
-      
-      {/* 1. COMPACT TOP HEADER */}
-      <TopBar
-        userSkill={userSkill}
-        setUserSkill={setUserSkill}
-        toggleDiagnostics={() => setIsDiagnosticsOpen(!isDiagnosticsOpen)}
-        isDiagnosticsOpen={isDiagnosticsOpen}
-      />
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Left Tool Rail */}
+      <ToolRail activeView={activeView} onViewChange={setActiveView} />
 
-      {/* 2. MAIN WORKSPACE SHELL */}
-      <div className="flex-1 flex overflow-hidden relative">
-        
-        {/* Left Minimal Tool Rail */}
-        <ToolRail activeTool={activeView} setActiveTool={setActiveView} />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar
+          userSkill={userSkill}
+          detectedIntent={detectedIntent}
+          selectedComponents={selectedComponents}
+          onToggleDiagnostics={() => setIsDiagnosticsOpen((v) => !v)}
+          isDiagnosticsOpen={isDiagnosticsOpen}
+        />
 
-        {/* Central Active Workspace */}
-        <main className="flex-1 overflow-hidden relative bg-cinema-950">
-          {activeView === 'tutor' && (
-            <EditorialTutorWorkspace
-              messages={messages}
-              loading={loading}
-              onSendMessage={handleSendMessage}
-              currentMedia={currentMedia}
-              onMediaAnalyzed={(media) => setCurrentMedia(media)}
-              detectedIntent={detectedIntent}
-              selectedComponents={selectedComponents}
-              userSkill={userSkill}
-            />
-          )}
-
-          {activeView === 'media' && (
-            <MediaAnalysisWorkstation
-              currentMedia={currentMedia}
-              onMediaAnalyzed={(media) => setCurrentMedia(media)}
-            />
-          )}
-
-          {activeView === 'practice' && (
-            <PracticeDrillsWorkstation
-              exercise={currentExercise}
-              onRequestNewExercise={fetchExercise}
-            />
-          )}
-
-          {activeView === 'profile' && (
-            <EditorialProfileWorkstation
-              userId="default_student"
-              skillLevel={userSkill}
-              setSkillLevel={setUserSkill}
-            />
-          )}
-
-          {activeView === 'timeline' && (
-            <MasterTimelineWorkstation currentMedia={currentMedia} />
-          )}
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+          {renderActiveView()}
         </main>
-
-        {/* Context Panel (Only when useful in tutor view or when media is loaded) */}
-        {(activeView === 'tutor' && (messages.length > 0 || currentMedia)) && (
-          <EditorialInspector
-            detectedIntent={detectedIntent}
-            selectedComponents={selectedComponents}
-            userSkill={userSkill}
-            currentMedia={currentMedia}
-          />
-        )}
       </div>
 
-      {/* 3. ASSISTANT PROCESS DRAWER */}
+      {/* Right: Editorial Inspector */}
+      <EditorialInspector
+        currentMedia={currentMedia}
+        detectedIntent={detectedIntent}
+        selectedComponents={selectedComponents}
+      />
+
+      {/* Bottom: ReAct Trace Drawer */}
       <ProcessDiagnosticsDrawer
         isOpen={isDiagnosticsOpen}
         onClose={() => setIsDiagnosticsOpen(false)}
-        trace={reactTrace}
-        selectedComponents={selectedComponents}
+        reactTrace={reactTrace}
         detectedIntent={detectedIntent}
+        selectedComponents={selectedComponents}
       />
     </div>
   );

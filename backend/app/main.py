@@ -1,21 +1,31 @@
 import os
+from dotenv import load_dotenv
+
+# Load .env before anything else
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router as api_router
 from app.database.database import init_db
+from app.ai_client import get_provider_info
 
-# Initialize DB models
+# Initialize SQLite DB
 init_db()
 
 app = FastAPI(
     title="AI Editing Tutor API",
-    description="Agentic AI Editing Tutor backend powered by LangGraph, OpenCV, and SQLAlchemy",
-    version="1.0.0"
+    description=(
+        "Agentic AI Editing Tutor backend — LangGraph ReAct loop, "
+        "OpenCV media analysis, SQLAlchemy memory, and 3 AI tools. "
+        "Works with OpenAI, Gemini, or Groq API keys."
+    ),
+    version="2.0.0",
 )
 
-# Enable CORS for React frontend
+# CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,22 +34,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Router
+# API routes
 app.include_router(api_router, prefix="/api")
 
-# Static directory for media files
-MEDIA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "media")
-os.makedirs(MEDIA_DIR, exist_ok=True)
-app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+# Serve uploaded media files
+media_dir = os.path.join(os.path.dirname(__file__), "..", "media")
+os.makedirs(media_dir, exist_ok=True)
+app.mount("/media", StaticFiles(directory=media_dir), name="media")
 
-@app.get("/")
-def root():
-    return {
-        "app": "AI Editing Tutor API",
-        "status": "online",
-        "architecture": "LangGraph ReAct Agent + Dynamic Component Assembly"
-    }
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+@app.on_event("startup")
+async def startup_event():
+    info = get_provider_info()
+    print(f"\n✅ AI Editing Tutor started")
+    print(f"   Provider : {info['provider']}")
+    print(f"   Model    : {info['model']}")
+    print(f"   Key set  : {info['key_set']}")
+    if not info["key_set"]:
+        print("   ⚠️  No API key — set OPENAI_API_KEY in backend/.env")
+    print(f"   Docs     : http://localhost:8000/docs\n")
