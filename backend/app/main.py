@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # Load .env before anything else
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+load_dotenv(override=True)  # Searches current dir (backend/) for .env automatically
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

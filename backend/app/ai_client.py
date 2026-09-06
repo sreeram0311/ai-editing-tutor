@@ -45,7 +45,7 @@ def get_llm(temperature: float = 0.7) -> ChatOpenAI:
     # Auto-detect model if not explicitly configured
     if not model:
         if provider == "Gemini":
-            model = "gemini-2.0-flash"
+            model = "gemini-3.6-flash"
         elif provider == "Groq":
             model = "llama-3.3-70b-versatile"
         else:
