@@ -1,6 +1,7 @@
 """
 Question Router and Dynamic Component Assembly Module.
 Classifies user intent and dynamically determines which architectural components are required.
+Works for ALL question types — editing-specific and general.
 """
 from typing import Dict, List, Tuple
 import re
@@ -53,53 +54,91 @@ INTENT_COMPONENT_MAP: Dict[str, List[str]] = {
     ],
     "GENERAL_EDITING": [
         "Question Router",
-        "Planner",
-        "Learning Profile",
+        "Knowledge Retriever",
         "Tutor"
-    ]
+    ],
+    "GENERAL": [
+        "Question Router",
+        "Knowledge Retriever",
+        "Tutor"
+    ],
 }
+
+# ── Keyword classifiers ──────────────────────────────────────────────────────
+
+_MEDIA_KEYWORDS = [
+    "analyze", "video", "clip", "footage", "frame", "fps", "resolution",
+    "upload", "file", "mp4", "mov", "this video", "my video", "my clip"
+]
+
+_STYLE_KEYWORDS = [
+    "style", "recommend", "cinematic", "documentary", "vlog", "music video",
+    "fast-paced", "slow", "aesthetic", "look", "feel", "genre"
+]
+
+_EXERCISE_KEYWORDS = [
+    "exercise", "practice", "drill", "quiz", "test", "challenge", "assignment",
+    "task", "improve", "learn by doing"
+]
+
+_FEEDBACK_KEYWORDS = [
+    "feedback", "review", "critique", "assess", "evaluate", "what do you think",
+    "how did i do", "rate my"
+]
+
+_TROUBLESHOOT_KEYWORDS = [
+    "problem", "issue", "fix", "error", "wrong", "not working", "help me fix",
+    "why does", "glitch", "bug", "artifact", "distortion"
+]
+
+_KNOWLEDGE_KEYWORDS = [
+    "what is", "what are", "how do", "how to", "explain", "define", "tell me",
+    "describe", "difference between", "when to use", "why", "cut", "transition",
+    "color grading", "sound", "audio", "j-cut", "l-cut", "velocity", "timeline",
+    "edit", "editing", "technique", "montage", "splice", "trim", "keyframe"
+]
+
 
 def classify_intent_and_assemble(query: str, has_media: bool = False) -> Tuple[str, List[str]]:
     """
-    Analyzes the user query and media availability to classify intent
-    and dynamically assemble the required components.
+    Classifies user query intent and dynamically assembles the required components.
+
+    Args:
+        query: The user's natural language query
+        has_media: Whether the user uploaded a media file
+
+    Returns:
+        (intent_label, list_of_components)
     """
-    q_lower = query.lower()
+    q = query.lower().strip()
 
-    # Check for Multi-step ReAct compound requests (Demo 5)
-    if ("analyze" in q_lower or "check" in q_lower or "look at" in q_lower) and \
-       ("weakness" in q_lower or "profile" in q_lower or "skill" in q_lower or "wrong" in q_lower) and \
-       ("exercise" in q_lower or "task" in q_lower or "practice" in q_lower or "drill" in q_lower):
-        intent = "MULTI_STEP_REACT"
-    
-    # Check for Exercise generation (Demo 4)
-    elif any(kw in q_lower for kw in ["exercise", "practice", "drill", "task", "assignment", "test my knowledge"]):
-        intent = "EXERCISE"
-
-    # Check for Style Recommendation (Demo 3)
-    elif any(kw in q_lower for kw in ["style", "cinematic", "documentary", "vlog", "youtube", "pacing preference", "which style"]):
-        intent = "STYLE_RECOMMENDATION"
-
-    # Check for Media Analysis / Pacing troubleshooting (Demo 2)
-    elif has_media or any(kw in q_lower for kw in ["analyze my video", "analyze this", "pacing", "cuts", "boring", "slow", "shot duration", "fps", "resolution"]):
-        if any(kw in q_lower for kw in ["feedback", "evaluate", "rate my edit", "grade"]):
+    # Media uploaded → always analyze it
+    if has_media:
+        if any(k in q for k in _STYLE_KEYWORDS):
+            intent = "STYLE_RECOMMENDATION"
+        elif any(k in q for k in _FEEDBACK_KEYWORDS):
             intent = "FEEDBACK"
-        elif any(kw in q_lower for kw in ["unnatural", "fix transition", "broken transition"]):
-            intent = "TROUBLESHOOTING"
+        elif any(k in q for k in _EXERCISE_KEYWORDS):
+            intent = "MULTI_STEP_REACT"
         else:
             intent = "MEDIA_ANALYSIS"
+        return intent, INTENT_COMPONENT_MAP[intent]
 
-    # Check for Editing Knowledge lookup (Demo 1)
-    elif any(kw in q_lower for kw in [
-        "what is", "explain", "how to", "definition", "j-cut", "l-cut", "jump cut", 
-        "match cut", "smash cut", "cross-cutting", "montage", "b-roll", "speed ramp",
-        "color correction", "color grade", "straight cut", "cutaway", "sound transition"
-    ]):
+    # No media — classify by keywords
+    if any(k in q for k in _EXERCISE_KEYWORDS):
+        intent = "EXERCISE"
+    elif any(k in q for k in _TROUBLESHOOT_KEYWORDS):
+        intent = "TROUBLESHOOTING"
+    elif any(k in q for k in _FEEDBACK_KEYWORDS):
+        intent = "FEEDBACK"
+    elif any(k in q for k in _STYLE_KEYWORDS):
+        intent = "STYLE_RECOMMENDATION"
+    elif any(k in q for k in _MEDIA_KEYWORDS):
+        intent = "MEDIA_ANALYSIS"
+    elif any(k in q for k in _KNOWLEDGE_KEYWORDS):
         intent = "KNOWLEDGE"
-
-    # Default fallback
     else:
-        intent = "GENERAL_EDITING"
+        # Catch-all: treat any question as general (searches knowledge + AI answers)
+        intent = "GENERAL"
 
-    components = INTENT_COMPONENT_MAP.get(intent, INTENT_COMPONENT_MAP["GENERAL_EDITING"])
-    return intent, components
+    return intent, INTENT_COMPONENT_MAP[intent]
