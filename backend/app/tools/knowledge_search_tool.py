@@ -13,7 +13,7 @@ from app.ai_client import get_llm
 from langchain_core.messages import HumanMessage, SystemMessage
 
 
-def search_knowledge(query: str, skill_level: str = "Beginner") -> Dict[str, Any]:
+def search_knowledge(query: str, skill_level: str = "Beginner", history: List[Dict[str, str]] = None) -> Dict[str, Any]:
     """
     Searches the editing knowledge base and returns an AI-synthesized answer.
 
@@ -58,12 +58,19 @@ def search_knowledge(query: str, skill_level: str = "Beginner") -> Dict[str, Any
         f"Provide a clear answer appropriate for a {skill_level} student."
     )
 
+    messages = [SystemMessage(content=system_prompt)]
+    if history:
+        from langchain_core.messages import AIMessage
+        for msg in history:
+            if msg["role"] == "user":
+                messages.append(HumanMessage(content=msg["content"]))
+            else:
+                messages.append(AIMessage(content=msg["content"]))
+    messages.append(HumanMessage(content=user_prompt))
+
     try:
         llm = get_llm(temperature=0.5)
-        response = llm.invoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt),
-        ])
+        response = llm.invoke(messages)
         answer = response.content
     except Exception as e:
         answer = f"[AI unavailable: {e}] Based on knowledge base: {context}"

@@ -14,7 +14,10 @@ from app.tools.learning_profile_tool import get_learning_profile, update_learnin
 from app.tools.knowledge_search_tool import search_knowledge
 from app.knowledge.knowledge_base import search_editing_knowledge
 from app.ai_client import get_llm
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from app.database.database import SessionLocal
+from app.database.models import Question
+import json
 
 MAX_ITERATIONS = 3
 
@@ -83,14 +86,14 @@ def reason_node(state: AgentState) -> Dict[str, Any]:
         next_action = "call_tool"
         pending_tool = {
             "name": "search_knowledge",
-            "args": {"query": state.get("user_query", ""), "skill_level": skill}
+            "args": {"query": state.get("user_query", ""), "skill_level": skill, "history": state.get("conversation_history", [])}
         }
     elif not tool_results and "search_knowledge" not in executed_tools:
         # Always search knowledge for questions with no tool results yet
         next_action = "call_tool"
         pending_tool = {
             "name": "search_knowledge",
-            "args": {"query": state.get("user_query", ""), "skill_level": "Beginner"}
+            "args": {"query": state.get("user_query", ""), "skill_level": "Beginner", "history": state.get("conversation_history", [])}
         }
 
     if iteration_count >= MAX_ITERATIONS:
@@ -141,7 +144,8 @@ def action_node(state: AgentState) -> Dict[str, Any]:
         elif tool_name == "search_knowledge":
             result = search_knowledge(
                 tool_args.get("query", ""),
-                tool_args.get("skill_level", "Beginner")
+                tool_args.get("skill_level", "Beginner"),
+                tool_args.get("history", [])
             )
         else:
             result = {"error": f"Unknown tool: {tool_name}"}
@@ -276,12 +280,19 @@ def synthesis_node(state: AgentState) -> Dict[str, Any]:
         "Provide a thorough, helpful response."
     )
 
+    messages = [SystemMessage(content=system_prompt)]
+    history = state.get("conversation_history", [])
+    if history:
+        for msg in history:
+            if msg["role"] == "user":
+                messages.append(HumanMessage(content=msg["content"]))
+            else:
+                messages.append(AIMessage(content=msg["content"]))
+    messages.append(HumanMessage(content=user_prompt))
+
     try:
         llm = get_llm(temperature=0.7)
-        response = llm.invoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_prompt),
-        ])
+        response = llm.invoke(messages)
         final_response = response.content
     except Exception as e:
         final_response = f"Error generating response: {e}\n\nTool observations:\n{obs_text}"
@@ -354,6 +365,14 @@ def run_react_agent(
     if _compiled_graph is None:
         _compiled_graph = build_graph()
 
+    db = SessionLocal()
+    recent_qs = db.query(Question).filter(Question.user_id == user_id).order_by(Question.created_at.desc()).limit(5).all()
+    history = []
+    for q in reversed(recent_qs):
+        history.append({"role": "user", "content": q.query})
+        if q.final_answer:
+            history.append({"role": "assistant", "content": q.final_answer})
+
     initial_state: AgentState = {
         "user_query": user_query,
         "user_id": user_id,
@@ -368,9 +387,21 @@ def run_react_agent(
         "next_action": None,
         "final_response": None,
         "exercise": None,
+        "conversation_history": history,
     }
 
     final_state = _compiled_graph.invoke(initial_state)
+    
+    new_q = Question(
+        user_id=user_id,
+        query=user_query,
+        intent=final_state.get("detected_intent", "GENERAL"),
+        components_selected_json=json.dumps(final_state.get("selected_components", [])),
+        final_answer=final_state.get("final_response", "")
+    )
+    db.add(new_q)
+    db.commit()
+    db.close()
 
     return {
         "final_response": final_state.get("final_response", "No response generated."),

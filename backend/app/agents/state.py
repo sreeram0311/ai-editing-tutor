@@ -20,3 +20,4 @@ class AgentState(TypedDict):
     next_action: Optional[str]
     final_response: Optional[str]
     exercise: Optional[Dict[str, Any]]
+    conversation_history: List[Dict[str, Any]]
