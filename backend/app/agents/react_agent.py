@@ -270,6 +270,10 @@ def synthesis_node(state: AgentState) -> Dict[str, Any]:
     system_prompt = (
         f"You are an expert video/audio/image editing tutor. "
         f"The student is at {skill_level} level. "
+        "You have exactly 3 tools at your disposal: "
+        "1) Media Analysis (OpenCV), "
+        "2) Learning Profile (SQL Database), "
+        "3) Knowledge Search (AI Search). "
         "Give a clear, helpful, structured response to their question. "
         "Base your answer on the observations from the tools. "
         "If no tool data is available, answer from your own knowledge."
